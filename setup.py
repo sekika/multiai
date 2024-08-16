@@ -12,8 +12,8 @@ inifile.read(path.join(here, 'multiai/data/system.ini'))
 version = inifile.get('system', 'version')
 description = inifile.get('system', 'description')
 url = inifile.get('system', 'url')
-# Read long description from Readme.md
-with open(path.join(here, 'Readme.md'), encoding='utf-8') as f:
+# Read long description from README.md
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
