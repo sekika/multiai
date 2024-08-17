@@ -14,6 +14,6 @@ python3 -m build
 twine upload --skip-existing dist/*
 
 # Uninstall unsatfit
-sudo /usr/bin/python3 -m pip uninstall multiai
+python3 -m pip uninstall multiai
 echo "Upload completed. Installed version uninstalled. Wait for a while and run"
 echo "python3 -m pip install multiai"

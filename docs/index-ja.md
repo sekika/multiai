@@ -117,7 +117,7 @@ APIキーの設定が完了したら、AIとの対話を開始できます。
 
 `multiai`は、設定ファイルから設定を読み込みます。設定ファイルの検索順序は次のとおりです：
 
-1. **システムデフォルト:** [システムデフォルト設定](https://github.com/sekika/multiai/blob/master/multiai/data/system.ini)
+1. **システムデフォルト:** [システムデフォルト設定](https://github.com/sekika/multiai/blob/master/src/multiai/data/system.ini)
 2. **ユーザーレベル:** `~/.multiai`
 3. **プロジェクトレベル:** `./.multiai`
 

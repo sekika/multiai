@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# Old setup.py, replaced by pyproject.toml
 
 from setuptools import setup
 from codecs import open

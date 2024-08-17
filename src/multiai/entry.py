@@ -9,7 +9,7 @@ import subprocess
 import sys
 import webbrowser
 from datetime import datetime
-from multiai import Prompt, Provider
+from .multiai import Prompt, Provider
 
 __all__ = [
     "entry",

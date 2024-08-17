@@ -1,0 +1,64 @@
+[project]
+name = "multiai"
+version = "0.6"
+description = "A Python library for text-based AI interactions"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Katsutoshi Seki"}
+]
+dependencies = [
+    'openai',
+    'anthropic',
+    'google-generativeai',
+    'requests',
+    'mistralai',
+    'pypager',
+    'pyperclip',
+    'PyPDF2',
+    'setuptools',
+    'trafilatura',
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Environment :: Console",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Natural Language :: English"
+]
+keywords = ["AI"]
+
+[project.urls]
+Homepage = "https://sekika.github.io/multiai/"
+Documentation = "https://sekika.github.io/multiai/"
+Source = "https://github.com/sekika/multiai"
+
+[build-system]
+requires = ["setuptools>=67.6.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+multiai = ["data/*"]
+
+[project.scripts]
+ai = "multiai.entry:entry"

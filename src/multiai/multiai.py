@@ -9,13 +9,14 @@ import json
 import openai
 import os
 import mistralai
+import pkg_resources
 import PyPDF2
 import pyperclip
 import requests
 import sys
 import trafilatura
 from io import BytesIO
-from multiai.printlong import print_long
+from .printlong import print_long
 
 __all__ = [
     "Prompt",
@@ -39,16 +40,21 @@ class Prompt():
         # Anthropic requires max_tokens, so default value is given.
         # It can be overwritten by max_tokens.
         self.max_tokens_anthropic = 4096
-        # Load system default values from data/system.ini
+        # Load package data
+        distribution = pkg_resources.get_distribution('multiai')
+        self.version = distribution.version
+        metadata = distribution.get_metadata(distribution.PKG_INFO)
+        for line in metadata.splitlines():
+            if line.startswith('Summary:'):
+                self.description = line.split(':', 1)[1].strip()
+            elif line.startswith('Project-URL: Homepage,'):
+                self.url = line.split(', ', 1)[1].strip()
+        # Load user setting from config file in the order of
+        # data/system.ini, ~/.multiai, .multai
+        # It overwrites the system default values
         inifile = configparser.ConfigParser()
         here = os.path.abspath(os.path.dirname(__file__))
         inifile.read(os.path.join(here, 'data/system.ini'))
-        self.version = inifile.get('system', 'version')
-        self.description = inifile.get('system', 'description')
-        self.url = inifile.get('system', 'url')
-        # Load user setting from config file in the order of
-        # ~/.multiai, .multai
-        # It overwrites the system default values
         conf_file = os.path.expanduser('~/.multiai')
         inifile.read(conf_file)
         inifile.read('.multiai')

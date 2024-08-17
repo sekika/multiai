@@ -117,7 +117,7 @@ Interactive mode can be exited by:
 
 `multiai` reads its settings from a configuration file, which can be located in the following order of precedence:
 
-1. **System Default:** [system default settings](https://github.com/sekika/multiai/blob/master/multiai/data/system.ini)
+1. **System Default:** [system default settings](https://github.com/sekika/multiai/blob/master/src/multiai/data/system.ini)
 2. **User-Level:** `~/.multiai`
 3. **Project-Level:** `./.multiai`
 
