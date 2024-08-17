@@ -80,7 +80,7 @@ def entry():
                             action='store_true', help='copy the latest answer')
     if not always_log:
         parser.add_argument('-l', '--log',
-                            action='store_true', help='save log file as chatgpt.md')
+                            action='store_true', help=f'save log as {log_file}')
     args = parser.parse_args()
     # Get prompt
     prompt = ' '.join(args.prompt)
