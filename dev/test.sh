@@ -9,10 +9,10 @@ ai -p hi
 ai -i hi
 
 echo '=== autopep8'
-autopep8 -i --aggressive ../multiai/*.py
+autopep8 -i --aggressive ../src/multiai/*.py
 
 echo '=== mypy'
-mypy ../multiai/*.py
+mypy ../src/multiai/*.py
 
 echo '=== flake8'
-flake8 --ignore=E501,F401 ../multiai/*.py
+flake8 --ignore=E501,F401 ../src/multiai/*.py
