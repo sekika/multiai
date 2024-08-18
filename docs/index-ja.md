@@ -23,7 +23,8 @@
   - [出力オプション](#出力オプション)
   - [コマンドラインオプション](#コマンドラインオプション)
 - [Pythonライブラリとしての`multiai`の使用](#pythonライブラリとしてのmultiaiの使用)
-- [ローカルチャットアプリの実行](#ローカルチャットアプリの実行)
+  - [Google Colabでの実行](#google-colabでの実行)
+  - [ローカルチャットアプリの実行](#ローカルチャットアプリの実行)
 
 ## 対応しているAIプロバイダーとモデル
 
@@ -318,7 +319,11 @@ python english.py text.md > output.md
 ```
 とします。`pre_prompt`パラメータを変えることで、色々なスクリプトを作ることができます。
 
-## ローカルチャットアプリの実行
+### Google Colabでの実行
+
+Google Colab で実行するには、[このノートブック](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb)を使用して下さい。Colab Secrets に API キーを設定する必要があります。
+
+### ローカルチャットアプリの実行
 
 `streamlit`を使用してローカルチャットアプリを実行できます。以下のコマンドを実行して`streamlit`をインストールしてください。
 ```bash

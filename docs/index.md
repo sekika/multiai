@@ -23,7 +23,8 @@
   - [Output Options](#output-options)
   - [Command-Line Options](#command-line-options)
 - [Using `multiai` as a Python Library](#using-multiai-as-a-python-library)
-- [Running your local chat app](#Running-your-local-chat-app)
+  - [Running on Google Colab](#Running-on-google-colab)
+  - [Running your local chat app](#Running-your-local-chat-app)
 
 ## Supported AI Providers and Models
 
@@ -318,7 +319,11 @@ python english.py text.md > output.md
 ```
 If you change `pre_prompt` parameter, you can make various kinds of script.
 
-## Running your local chat app
+### Running on Google Colab
+
+To run on Google Colab, use [this notebook](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb). You will need to set API keys in your Colab Secrets.
+
+### Running your local chat app
 
 You can run your local chat app using `streamlit`. Install `streamlit` by running the following command:
 ```bash
