@@ -31,12 +31,6 @@ def entry():
     inifile.read(os.path.expanduser('~/.multiai'))
     inifile.read('.multiai')
     # Start reading [command] section of the config file
-    # blank_lines: blank lines required to finish input
-    client.blank_lines = inifile.getint('command', 'blank_lines')
-    # always_copy: always use -c option
-    always_copy = inifile.getboolean('command', 'always_copy')
-    # always_log: always use -l option
-    always_log = inifile.getboolean('command', 'always_copy')
     # log_file: file name of the log file.
     log_file = inifile.get('command', 'log_file')
     log_file = os.path.expanduser(log_file)
@@ -75,10 +69,10 @@ def entry():
                         action='store_true', help='factual information')
     parser.add_argument('-u', '--url',
                         help='retrieve text from the URL')
-    if not always_copy:
+    if not client.always_copy:
         parser.add_argument('-c', '--copy',
                             action='store_true', help='copy the latest answer')
-    if not always_log:
+    if not client.always_log:
         parser.add_argument('-l', '--log',
                             action='store_true', help=f'save log as {log_file}')
     args = parser.parse_args()
@@ -112,11 +106,11 @@ def entry():
             print("Invalid 'temperature': should be >=0.")
             sys.exit(1)
     # -c option
-    if always_copy:
+    if client.always_copy:
         args.copy = True
     client.copy = args.copy
     # -l option
-    if always_log:
+    if client.always_log:
         args.log = True
     client.log = args.log
     if args.log:

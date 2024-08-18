@@ -40,6 +40,7 @@ class Prompt():
         # Anthropic requires max_tokens, so default value is given.
         # It can be overwritten by max_tokens.
         self.max_tokens_anthropic = 4096
+        self.ai_providers = []
         # Load package data
         distribution = pkg_resources.get_distribution('multiai')
         self.version = distribution.version
@@ -68,7 +69,12 @@ class Prompt():
             setattr(self, 'model_' + name, model)
         self.temperature = inifile.getfloat('default', 'temperature')
         self.max_requests = inifile.getint('default', 'max_requests')
+        self.blank_lines = inifile.getint('command', 'blank_lines')
         prompt_color = inifile.get('prompt', 'color')
+        self.always_copy = inifile.getboolean('command', 'always_copy')
+        self.copy = self.always_copy
+        self.always_log = inifile.getboolean('command', 'always_copy')
+        self.log = self.always_log
         try:
             self.prompt_color = ColorCode[prompt_color.upper()].value
         except Exception:
@@ -244,6 +250,8 @@ class Prompt():
         prompt = ''
         blank = 0
         b = self.blank_lines
+        if len(self.ai_providers) == 0:
+            self.ai_providers = [self.ai_provider]
         if b > 0:
             print(
                 f'\nInput {b} blank line{"s" if b > 1 else ""} to finish input.')
