@@ -23,8 +23,8 @@
   - [Output Options](#output-options)
   - [Command-Line Options](#command-line-options)
 - [Using `multiai` as a Python Library](#using-multiai-as-a-python-library)
-  - [Running on Google Colab](#Running-on-google-colab)
-  - [Running your local chat app](#Running-your-local-chat-app)
+  - [Running on Google Colab](#running-on-google-colab)
+  - [Running your local chat app](#running-your-local-chat-app)
 
 ## Supported AI Providers and Models
 
