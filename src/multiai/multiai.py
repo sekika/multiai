@@ -212,9 +212,14 @@ class Prompt():
             if self.log:
                 if prompt_summary is not None:
                     prompt = prompt_summary
-                with open(self.log_file, mode='a') as f:
-                    f.write(
-                        f'### {self.role}:\n{prompt}\n### {self.model}:\n{answer}\n')
+                try:
+                    with open(self.log_file, mode='a') as f:
+                        f.write(
+                            f'### {self.role}:\n{prompt}\n### {self.model}:\n{answer}\n')
+                except Exception as e:
+                    print(e)
+                    print('Check the setting of log_file.')
+                    sys.exit(1)
         else:
             answer = ''
             if prompt_summary is None:

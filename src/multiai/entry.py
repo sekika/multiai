@@ -115,8 +115,13 @@ def entry():
     client.log = args.log
     if args.log:
         if not os.path.exists(log_file):
-            with open(log_file, 'w') as file:
-                file.write("# AI chat log\n\n")
+            try:
+                with open(log_file, 'w') as file:
+                    file.write("# AI chat log\n\n")
+            except Exception as e:
+                print(e)
+                print('Check the setting of log_file.')
+                sys.exit(1)
     # -e and -f option
     pre_prompt = ''
     if args.english:
