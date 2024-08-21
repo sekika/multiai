@@ -10,6 +10,7 @@ from datetime import datetime
 
 # Edit settings here
 st.set_page_config(page_title='Chotto GPT')
+document_url = 'https://sekika.github.io/multiai/'
 models = [
     'gpt-4o',
     'gpt-4o-mini',
@@ -90,7 +91,7 @@ st.markdown(
 if initial:
     st.write(
         f'''Welcome to `Chotto GPT`, a chat communication tool that uses
-        the [multiai](https://sekika.github.io/multiai/) library.
+        the [multiai]({document_url}) library (version {client.version}).
         Select a model from the menu above. You can modify the list by
         editing the `models` parameter in the source code. If you check
         "Save log file," the file will be saved to `{log_file}`.
