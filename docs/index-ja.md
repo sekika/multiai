@@ -23,8 +23,9 @@
   - [出力オプション](#出力オプション)
   - [コマンドラインオプション](#コマンドラインオプション)
 - [Pythonライブラリとしての`multiai`の使用](#pythonライブラリとしてのmultiaiの使用)
-  - [Google Colabでの実行](#google-colabでの実行)
+  - [テキストファイルを翻訳するスクリプト](#テキストファイルを翻訳するスクリプト)
   - [ローカルチャットアプリの実行](#ローカルチャットアプリの実行)
+  - [Google Colabでの実行](#google-colabでの実行)
 
 ## 対応しているAIプロバイダーとモデル
 
@@ -291,7 +292,9 @@ client.clear()
 
 `client.ask`でエラーが発生した場合、エラーメッセージが返され、`client.error`が`True`に設定されます。
 
-もう1つの例を示します。次のコードを `english.py` として保存してください。
+### テキストファイルを翻訳するスクリプト
+
+以下は、`multiai`ライブラリを使用してテキストファイルを翻訳するPythonスクリプトの例です。このコードを`english.py`として保存してください。
 
 ```python
 import multiai
@@ -319,10 +322,6 @@ python english.py text.md > output.md
 ```
 とします。`pre_prompt`パラメータを変えることで、色々なスクリプトを作ることができます。
 
-### Google Colabでの実行
-
-Google Colab で実行するには、[このノートブック](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb)を使用して下さい。Colab Secrets に API キーを設定する必要があります。
-
 ### ローカルチャットアプリの実行
 
 `streamlit`を使用してローカルチャットアプリを実行できます。以下のコマンドを実行して`streamlit`をインストールしてください。
@@ -336,3 +335,7 @@ streamlit run app.py
 ```
 
 サーバーが起動すると、デフォルトのウェブブラウザが開き、チャットアプリケーション(Chotto GPT)が表示されます。このアプリでは、さまざまなプロバイダーからのAIモデルを簡単に選択し、それらと会話を楽しむことができます。利用可能なモデルのリストやログファイルの場所は、ソースコードを直接編集することでカスタマイズできます。
+
+### Google Colabでの実行
+
+Google Colab で実行するには、[このノートブック](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb)を使用して下さい。Colab Secrets に API キーを設定する必要があります。

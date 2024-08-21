@@ -23,8 +23,9 @@
   - [Output Options](#output-options)
   - [Command-Line Options](#command-line-options)
 - [Using `multiai` as a Python Library](#using-multiai-as-a-python-library)
-  - [Running on Google Colab](#running-on-google-colab)
+  - [Sample script to translate a text file](#sample-script-to-translate-a-text-file)
   - [Running your local chat app](#running-your-local-chat-app)
+  - [Running on Google Colab](#running-on-google-colab)
 
 ## Supported AI Providers and Models
 
@@ -291,7 +292,9 @@ client.clear()
 
 If an error occurs during `client.ask`, the error message will be returned, and `client.error` will be set to `True`.
 
-Another example. Save the following code as `english.py`.
+### Sample script to translate a text file
+
+Here is an example of a Python script using the `multiai` library to translate a text file. Save the following code as `english.py`.
 
 ```python
 import multiai
@@ -319,10 +322,6 @@ python english.py text.md > output.md
 ```
 If you change `pre_prompt` parameter, you can make various kinds of script.
 
-### Running on Google Colab
-
-To run on Google Colab, use [this notebook](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb). You will need to set API keys in your Colab Secrets.
-
 ### Running your local chat app
 
 You can run your local chat app using `streamlit`. Install `streamlit` by running the following command:
@@ -337,3 +336,7 @@ streamlit run app.py
 ```
 
 Once the server is running, your default web browser will open and display the chat application, Chotto GPT. This app allows you to easily select from a variety of AI models from different providers and engage in conversations with them. You can customize the list of available models and the log file location by directly editing the source code.
+
+### Running on Google Colab
+
+To run on Google Colab, use [this notebook](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb). You will need to set API keys in your Colab Secrets.
