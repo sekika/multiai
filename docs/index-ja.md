@@ -128,30 +128,7 @@ APIキーの設定が完了したら、AIとの対話を開始できます。
 以下は設定ファイルの例です：
 
 ```ini
-[model]
-ai_provider = openai
-openai = gpt-4o-mini
-anthropic = claude-3-haiku-20240307
-google = gemini-1.5-flash
-perplexity = llama-3.1-sonar-small-128k-chat
-mistral = mistral-large-latest
-
-[default]
-temperature = 0.7
-max_requests = 5
-
-[command]
-blank_lines = 0
-always_copy = no
-always_log = no
-log_file = chat-ai-DATE.md
-
-[prompt]
-color = blue
-english = If the following sentence is English, revise the text to improve its readability and clarity in English. If not, translate into English. No need to explain. Just output the result English text.
-factual = 自信がないことは回答を拒否して。
-url = 以下のテキストを日本語で200文字程度で要約してください。
-
+{% include system.ini %}
 [api_key]
 openai = (Your OpenAI API key)
 anthropic = (Your Claude API key)

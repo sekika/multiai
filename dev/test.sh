@@ -1,6 +1,7 @@
 #!/bin/sh
 # Change to this directory
 cd `echo $0 | sed -e 's/[^/]*$//'`
+cp ../src/multiai/data/system.ini ../docs/_includes/system.ini
 echo '=== test'
 ai -o hi
 ai -a 土壌について
