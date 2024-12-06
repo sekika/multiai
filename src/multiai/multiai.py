@@ -361,12 +361,20 @@ class Prompt():
         if not self.prompt_continue:
             self.openai_messages += self.message
         try:
-            self.completion = openai.chat.completions.create(
-                messages=self.openai_messages,
-                model=self.model_openai,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
+            if 'o1' in self.model:
+                # o1 series does not support variable temperature and
+                # max_tokens
+                self.completion = openai.chat.completions.create(
+                    messages=self.openai_messages,
+                    model=self.model_openai,
+                )
+            else:
+                self.completion = openai.chat.completions.create(
+                    messages=self.openai_messages,
+                    model=self.model_openai,
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens
+                )
             self.error = False
             self.response = self.completion.choices[0].message.content.strip(
             )

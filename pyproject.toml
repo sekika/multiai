@@ -1,6 +1,6 @@
 [project]
 name = "multiai"
-version = "0.8"
+version = "1.0.0"
 description = "A Python library for text-based AI interactions"
 readme = "README.md"
 license = {text = "MIT"}
@@ -21,7 +21,7 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Environment :: Console",

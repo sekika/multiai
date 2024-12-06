@@ -14,6 +14,8 @@ document_url = 'https://sekika.github.io/multiai/'
 models = [
     'gpt-4o',
     'gpt-4o-mini',
+    'o1-preview',
+    'o1-mini',
     'claude-3-5-sonnet-20240620',
     'claude-3-haiku-20240307',
     'gemini-1.5-pro',
@@ -31,7 +33,7 @@ log_file = log_file.replace('DATE', datetime.today().strftime('%Y%m%d'))
 def get_provider(model):
     if 'mistral' in model:
         return 'mistral'
-    p = {'gp': 'openai', 'cl': 'anthropic', 'ge': 'google', 'll': 'perplexity'}
+    p = {'gp': 'openai', 'o1': 'openai', 'cl': 'anthropic', 'ge': 'google', 'll': 'perplexity'}
     if model[:2] in p:
         return p[model[:2]]
     st.write(f'''System message: `get_provider` function cannot get
