@@ -36,7 +36,7 @@
 | **OpenAI**   | [ChatGPT](https://chatgpt.com/) | [GPT Models](https://platform.openai.com/docs/models) |
 | **Anthropic**| [Claude](https://claude.ai/) | [Claude Models](https://docs.anthropic.com/en/docs/about-claude/models) |
 | **Google**   | [Gemini](https://gemini.google.com/)| [Gemini Models](https://ai.google.dev/gemini-api/docs/models/gemini)  |
-| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/docs/model-cards) |
+| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistral Models](https://docs.mistral.ai/getting-started/models/) |
 
 ## Key Features

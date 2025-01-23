@@ -16,12 +16,12 @@ models = [
     'gpt-4o-mini',
     'o1-preview',
     'o1-mini',
-    'claude-3-5-sonnet-20240620',
-    'claude-3-haiku-20240307',
+    'claude-3-5-sonnet-latest',
+    'claude-3-5-haiku-latest',
     'gemini-1.5-pro',
     'gemini-1.5-flash',
-    'llama-3.1-sonar-huge-128k-online',
-    'llama-3.1-sonar-small-128k-chat',
+    'sonar-pro',
+    'sonar',
     'mistral-large-latest',
     'open-mistral-nemo']
 
@@ -33,7 +33,7 @@ log_file = log_file.replace('DATE', datetime.today().strftime('%Y%m%d'))
 def get_provider(model):
     if 'mistral' in model:
         return 'mistral'
-    p = {'gp': 'openai', 'o1': 'openai', 'cl': 'anthropic', 'ge': 'google', 'll': 'perplexity'}
+    p = {'gp': 'openai', 'o1': 'openai', 'cl': 'anthropic', 'ge': 'google', 'so': 'perplexity'}
     if model[:2] in p:
         return p[model[:2]]
     st.write(f'''System message: `get_provider` function cannot get

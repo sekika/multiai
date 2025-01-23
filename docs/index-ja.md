@@ -36,7 +36,7 @@
 | **OpenAI**      | [ChatGPT](https://chatgpt.com/) | [GPTモデル](https://platform.openai.com/docs/models) |
 | **Anthropic**   | [Claude](https://claude.ai/) | [Claudeモデル](https://docs.anthropic.com/en/docs/about-claude/models) |
 | **Google**      | [Gemini](https://gemini.google.com/)| [Geminiモデル](https://ai.google.dev/gemini-api/docs/models/gemini)  |
-| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexityモデル](https://docs.perplexity.ai/docs/model-cards) |
+| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexityモデル](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistralモデル](https://docs.mistral.ai/getting-started/models/) |
 
 ## 主な機能
