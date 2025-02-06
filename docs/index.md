@@ -2,7 +2,7 @@
 
 # multiai
 
-`multiai` is a Python library and command-line tool designed to interact with text-based generative AI models from OpenAI, Anthropic, Google, Perplexity, and Mistral. This manual will guide you through the installation, configuration, and usage of `multiai`.
+`multiai` is a Python library and command-line tool designed to interact with text-based generative AI models from OpenAI, Anthropic, Google, Perplexity, Mistral and DeepSeek. This manual will guide you through the installation, configuration, and usage of `multiai`.
 
 ## Table of Contents
 
@@ -38,6 +38,10 @@
 | **Google**   | [Gemini](https://gemini.google.com/)| [Gemini Models](https://ai.google.dev/gemini-api/docs/models/gemini)  |
 | **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistral Models](https://docs.mistral.ai/getting-started/models/) |
+| **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeek Models](https://api-docs.deepseek.com/quick_start/pricing) |
+| **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
+
+- DeepSeek and Local LLM require version 1.1.0 or higher.
 
 ## Key Features
 
@@ -135,6 +139,7 @@ anthropic = (Your Claude API key)
 google = (Your Gemini API key)
 perplexity = (Your Perplexity API key)
 mistral = (Your Mistral API key)
+deepseek = (Your DeepSeek API key)
 ```
 
 #### Selecting Models and Providers
@@ -146,6 +151,8 @@ The default AI provider is specified in the `[model]` section of the settings fi
 - `-g` for Google
 - `-p` for Perplexity
 - `-i` for Mistral
+- `-d` for DeepSeek
+- `-l` for local LLM
 
 You can also specify the model using the `-m` option. For example, to use the `gpt-4o` model from OpenAI:
 
@@ -168,8 +175,17 @@ API keys can be stored as environment variables:
 - `GOOGLE_API_KEY` for Google
 - `PERPLEXITY_API_KEY` for Perplexity
 - `MISTRAL_API_KEY` for Mistral
+- `DEEPSEEK_API_KEY` for DeepSeek
 
 If environment variables are not set, `multiai` will look for keys in the `[api_key]` section of your settings file.
+
+#### Using a Local LLM
+To use a local LLM, follow these steps:
+
+1. Install [Ollama](https://ollama.com/).
+2. Start Ollama by running `ollama serve` in your terminal.
+3. Pull a model to use, for example: `ollama pull llama3.3`.
+4. Start a mltiai session by running `ai -lm llama3.3`.
 
 ---
 
@@ -233,12 +249,6 @@ To see a list of all command-line options, use:
 
 ```bash
 ai -h
-```
-
-For more detailed documentation, you can open this manual in a web browser with:
-
-```bash
-ai -d
 ```
 
 ## Using `multiai` as a Python Library

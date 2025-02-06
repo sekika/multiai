@@ -2,7 +2,7 @@
 
 # multiai
 
-`multiai`は、OpenAI、Anthropic、Google、Perplexity、Mistralのテキスト生成AIモデルとやり取りするためのPythonライブラリおよびコマンドラインツールです。このマニュアルでは、`multiai`のインストール、設定、および使用方法について説明します。
+`multiai`は、OpenAI、Anthropic、Google、Perplexity、Mistral、DeepSeekのテキスト生成AIモデルとやり取りするためのPythonライブラリおよびコマンドラインツールです。このマニュアルでは、`multiai`のインストール、設定、および使用方法について説明します。
 
 ## 目次
 
@@ -38,6 +38,10 @@
 | **Google**      | [Gemini](https://gemini.google.com/)| [Geminiモデル](https://ai.google.dev/gemini-api/docs/models/gemini)  |
 | **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexityモデル](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistralモデル](https://docs.mistral.ai/getting-started/models/) |
+| **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeekモデル](https://api-docs.deepseek.com/quick_start/pricing) |
+| **Local LLM**  | [Ollama](https://ollama.com/) | [Ollamaモデル](https://ollama.com/search) |
+
+- DeepSeek と Local LLM はバージョン 1.1.0 以上が必要
 
 ## 主な機能
 
@@ -135,6 +139,7 @@ anthropic = (Your Claude API key)
 google = (Your Gemini API key)
 perplexity = (Your Perplexity API key)
 mistral = (Your Mistral API key)
+deepseek = (Your DeepSeek API key)
 ```
 
 #### モデルとプロバイダーの選択
@@ -146,6 +151,8 @@ mistral = (Your Mistral API key)
 - `-g` Google
 - `-p` Perplexity
 - `-i` Mistral
+- `-d` DeepSeek
+- `-l` local LLM
 
 また、`-m`オプションを使用してモデルを指定することもできます。例えば、OpenAIの`gpt-4o`モデルを使用するには：
 
@@ -169,8 +176,17 @@ APIキーは、環境変数として保存できます：
 - `GOOGLE_API_KEY` Google用
 - `PERPLEXITY_API_KEY` Perplexity用
 - `MISTRAL_API_KEY` Mistral用
+- `DEEPSEEK_API_KEY` DeepSeek用
 
 環境変数が設定されていない場合、`multiai`は設定ファイルの`[api_key]`セクションにあるキーを探します。
+
+#### ローカルLLMの使用方法
+ローカルLLMを使用するには、以下の手順に従ってください：
+
+1. [Ollama](https://ollama.com/)をインストールします。
+2. ターミナルで`ollama serve`を実行して、Ollamaを起動します。
+3. 使用するモデルをダウンロードします。例：`ollama pull llama3.3`
+4. `ai -lm llama3.3`を実行して、multiai セッションを開始します。
 
 ---
 
@@ -234,12 +250,6 @@ APIキーは、環境変数として保存できます：
 
 ```bash
 ai -h
-```
-
-より詳細なドキュメントを見るには、このマニュアル（英語版）をウェブブラウザで開くことができます：
-
-```bash
-ai -d
 ```
 
 ## Pythonライブラリとしての`multiai`の使用
