@@ -6,6 +6,7 @@ import configparser
 import enum
 import google.generativeai as genai
 import json
+import ollama
 import openai
 import os
 import mistralai
@@ -132,7 +133,9 @@ class Prompt():
         self.anthropic_messages = []
         self.google_chat = None
         self.perplexity_messages = []
+        self.deepseek_messages = []
         self.mistral_messages = []
+        self.local_messages = []
 
     def ask(self, prompt, request=1, verbose=False):
         """
@@ -361,8 +364,8 @@ class Prompt():
         if not self.prompt_continue:
             self.openai_messages += self.message
         try:
-            if 'o1' in self.model:
-                # o1 series does not support variable temperature and
+            if self.model[0] == 'o':
+                # o1 and o3 series do not support variable temperature and
                 # max_tokens
                 self.completion = openai.chat.completions.create(
                     messages=self.openai_messages,
@@ -400,7 +403,8 @@ class Prompt():
             self.error_message = 'API key for Anthropic is not set.'
             return
         client = anthropic.Anthropic(api_key=self.anthropic_api_key)
-        self.anthropic_messages += self.message
+        if not self.prompt_continue:
+            self.anthropic_messages += self.message
         try:
             self.completion = client.messages.create(
                 messages=self.anthropic_messages,
@@ -492,6 +496,47 @@ class Prompt():
             except Exception:
                 self.error_message = e
 
+    def ask_deepseek(self):
+        """
+        Ask a question to DeepSeek.
+        """
+        if self.deepseek_api_key is None:
+            self.error = True
+            self.error_message = 'API key for DeepSeek is not set.'
+            return
+        base_url = 'https://api.deepseek.com'
+        client = openai.OpenAI(
+            api_key=self.deepseek_api_key,
+            base_url=base_url)
+        if not self.prompt_continue:
+            self.deepseek_messages += self.message
+        try:
+            self.completion = client.chat.completions.create(
+                messages=self.deepseek_messages,
+                model=self.model_deepseek,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                stream=False
+            )
+            self.error = False
+            self.response = self.completion.choices[0].message.content.strip(
+            )
+            self.finish_reason = self.completion.choices[0].finish_reason
+            self.deepseek_messages += [{"role": "assistant",
+                                        "content": self.response}]
+        except json.JSONDecodeError:
+            self.error = True
+            self.error_message = 'Error: Invalid JSON response from DeepSeek API.'
+        except openai.APIError as e:
+            self.error = True
+            try:
+                self.error_code = e.status_code
+                self.error_dict = e.body
+                self.error_type = f"Error {self.error_code}: {self.error_dict['code']}"
+                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
+            except Exception:
+                self.error_message = e
+
     def ask_mistral(self):
         """
         Ask a question to mistral.
@@ -524,6 +569,38 @@ class Prompt():
             except Exception:
                 self.error_message = e
 
+    def ask_local(self):
+        """
+        Ask a question to local language model.
+        """
+        if not self.prompt_continue:
+            self.local_messages += self.message
+        try:
+            self.response = ollama.chat(
+                messages=self.local_messages,
+                model=self.model_local
+            )
+            self.error = False
+            self.response = self.response.message.content.strip()
+            self.finish_reason = 'stop'
+            self.local_messages += [{"role": "assistant",
+                                     "content": self.response}]
+        except ConnectionError as e:
+            self.error = True
+            self.error_message = f'{e}\nInstall ollama and run "ollama serve".'
+        except Exception as e:
+            # print(f'e = {e.__dict__.keys()}')
+            # for key in e.__dict__.keys():
+            #     print(f'e.{key} = {getattr(e, key)}')
+            self.error = True
+            try:
+                self.error_code = e.status_code
+                self.error_message = e.error
+                if self.error_code == 404:
+                    self.error_message += f'\nRun "ollama pull {self.model}" and try again.'
+            except Exception:
+                self.error_message = e
+
 
 class Provider(enum.Enum):
     """
@@ -536,11 +613,13 @@ class Provider(enum.Enum):
     (3) Update clear() function in Prompt class
     (4) Define default model at system.ini
     """
+    OPENAI = enum.auto()
     ANTHROPIC = enum.auto()
     GOOGLE = enum.auto()
-    OPENAI = enum.auto()
     PERPLEXITY = enum.auto()
     MISTRAL = enum.auto()
+    DEEPSEEK = enum.auto()
+    LOCAL = enum.auto()
 
 
 class ColorCode(enum.Enum):

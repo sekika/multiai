@@ -7,8 +7,11 @@
 | **OpenAI**   | [ChatGPT](https://chat.openai.com/) | [GPT Models](https://platform.openai.com/docs/models) |
 | **Anthropic**| [Claude](https://claude.ai/) | [Claude Models](https://docs.anthropic.com/en/docs/about-claude/models) |
 | **Google**   | [Gemini](https://gemini.google.com/)| [Gemini Models](https://ai.google.dev/gemini-api/docs/models/gemini) |
-| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/docs/model-cards) |
+| **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistral Models](https://docs.mistral.ai/getting-started/models/) |
+| **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeek Models](https://api-docs.deepseek.com/quick_start/pricing) |
+| **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
+
 
 ## Key Features
 
@@ -59,11 +62,7 @@ To see a list of all command-line options, use:
 ai -h
 ```
 
-For more detailed documentation, you can open the [manual](https://sekika.github.io/multiai/) in a web browser with:
-
-```bash
-ai -d
-```
+For more detailed documentation, please refer to the [manual](https://sekika.github.io/multiai/).
 
 ## Using `multiai` as a Python Library
 

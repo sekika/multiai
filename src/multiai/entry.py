@@ -44,18 +44,16 @@ def entry():
     prompt_url = inifile.get('prompt', 'url')
     # Load commandline argument
     parser = argparse.ArgumentParser(
-        description=f'multiai {client.version} - {client.description}')
+        description=f'multiai {client.version} - {client.description} {client.url}')
     parser.add_argument('prompt', nargs='*',
                         help='prompt for AI')
-    parser.add_argument('-d', '--document',
-                        action='store_true', help='open document page and exit')
     for provider in Provider:
         name = provider.name.lower()
         help = 'use ' + name
         if client.ai_provider == provider:
             help += ' (Default)'
         parser.add_argument(
-            '-' + name.replace('m', '')[0],
+            '-' + name.replace('m', '')[0],  # -i for mistral
             '--' + name,
             action='store_true',
             help=help)
@@ -78,10 +76,6 @@ def entry():
     args = parser.parse_args()
     # Get prompt
     prompt = ' '.join(args.prompt)
-    # -d option
-    if args.document:
-        webbrowser.open(client.url)
-        sys.exit()
     # Set ai_provider, ai_providers and model
     client.ai_providers = []
     for provider in Provider:

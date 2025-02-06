@@ -1,3 +1,13 @@
+[model]
+ai_provider = anthropic
+openai = gpt-4o-mini
+anthropic = claude-3-5-haiku-latest
+google = gemini-1.5-flash
+perplexity = sonar
+mistral = mistral-small-latest
+deepseek = deepseek-chat
+local = llama3.2:1b
+
 [default]
 temperature = 0
 max_tokens = 10

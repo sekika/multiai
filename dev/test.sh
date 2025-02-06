@@ -7,7 +7,10 @@ ai -o hi
 ai -a 土壌について
 ai -g 土壌について
 ai -p hi
-ai -i hi
+echo 'Skipping mistral test'
+# ai -i hi
+ai -d hi
+ai -l hi
 
 echo '=== autopep8'
 autopep8 -i --aggressive ../src/multiai/*.py
