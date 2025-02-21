@@ -23,6 +23,7 @@ models = [
     'sonar',
     'deepseek-chat',
     'deepseek-reasoner',
+    'grok-2-latest',
     'mistral-large-latest',
     'open-mistral-nemo']
 
@@ -34,7 +35,7 @@ log_file = log_file.replace('DATE', datetime.today().strftime('%Y%m%d'))
 def get_provider(model):
     if 'mistral' in model:
         return 'mistral'
-    p = {'gp': 'openai', 'o3': 'openai', 'cl': 'anthropic', 'ge': 'google', 'so': 'perplexity', 'de': 'deepseek'}
+    p = {'gp': 'openai', 'o3': 'openai', 'cl': 'anthropic', 'ge': 'google', 'so': 'perplexity', 'de': 'deepseek', 'gr': 'xai'}
     if model[:2] in p:
         return p[model[:2]]
     st.write(f'''System message: `get_provider` function cannot get

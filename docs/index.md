@@ -2,7 +2,7 @@
 
 # multiai
 
-`multiai` is a Python library and command-line tool designed to interact with text-based generative AI models from OpenAI, Anthropic, Google, Perplexity, Mistral and DeepSeek. This manual will guide you through the installation, configuration, and usage of `multiai`.
+`multiai` is a Python library and command-line tool designed to interact with text-based generative AI models from OpenAI, Anthropic, Google, Perplexity, Mistral, DeepSeek and xAI. This manual will guide you through the installation, configuration, and usage of `multiai`.
 
 ## Table of Contents
 
@@ -39,9 +39,10 @@
 | **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistral Models](https://docs.mistral.ai/getting-started/models/) |
 | **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeek Models](https://api-docs.deepseek.com/quick_start/pricing) |
+| **xAI**  | [xAI](https://grok.com/) | [xAI Models](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
 
-- DeepSeek and Local LLM require version 1.1.0 or higher.
+- DeepSeek and Local LLM require version 1.1.0 or higher. xAI requres version 1.2.0 or higher.
 
 ## Key Features
 
@@ -140,6 +141,7 @@ google = (Your Gemini API key)
 perplexity = (Your Perplexity API key)
 mistral = (Your Mistral API key)
 deepseek = (Your DeepSeek API key)
+xai = (Your xAI API key)
 ```
 
 #### Selecting Models and Providers
@@ -152,6 +154,7 @@ The default AI provider is specified in the `[model]` section of the settings fi
 - `-p` for Perplexity
 - `-i` for Mistral
 - `-d` for DeepSeek
+- `-x` for xAI
 - `-l` for local LLM
 
 You can also specify the model using the `-m` option. For example, to use the `gpt-4o` model from OpenAI:
@@ -176,6 +179,7 @@ API keys can be stored as environment variables:
 - `PERPLEXITY_API_KEY` for Perplexity
 - `MISTRAL_API_KEY` for Mistral
 - `DEEPSEEK_API_KEY` for DeepSeek
+- `XAI_API_KEY` for xAI
 
 If environment variables are not set, `multiai` will look for keys in the `[api_key]` section of your settings file.
 

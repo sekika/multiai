@@ -10,6 +10,7 @@
 | **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexity Models](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistral Models](https://docs.mistral.ai/getting-started/models/) |
 | **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeek Models](https://api-docs.deepseek.com/quick_start/pricing) |
+| **xAI**  | [xAI](https://grok.com/) | [xAI Models](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
 
 

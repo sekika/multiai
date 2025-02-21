@@ -2,7 +2,7 @@
 
 # multiai
 
-`multiai`は、OpenAI、Anthropic、Google、Perplexity、Mistral、DeepSeekのテキスト生成AIモデルとやり取りするためのPythonライブラリおよびコマンドラインツールです。このマニュアルでは、`multiai`のインストール、設定、および使用方法について説明します。
+`multiai`は、OpenAI、Anthropic、Google、Perplexity、Mistral、DeepSeek、xAIのテキスト生成AIモデルとやり取りするためのPythonライブラリおよびコマンドラインツールです。このマニュアルでは、`multiai`のインストール、設定、および使用方法について説明します。
 
 ## 目次
 
@@ -39,9 +39,10 @@
 | **Perplexity** | [Perplexity](https://www.perplexity.ai/) | [Perplexityモデル](https://docs.perplexity.ai/guides/model-cards) |
 | **Mistral**  | [Mistral](https://chat.mistral.ai/chat) | [Mistralモデル](https://docs.mistral.ai/getting-started/models/) |
 | **DeepSeek**  | [DeepSeek](https://chat.deepseek.com/) | [DeepSeekモデル](https://api-docs.deepseek.com/quick_start/pricing) |
+| **xAI**  | [xAI](https://grok.com/) | [xAIモデル](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollamaモデル](https://ollama.com/search) |
 
-- DeepSeek と Local LLM はバージョン 1.1.0 以上が必要
+- DeepSeek と Local LLM はバージョン 1.1.0 以上が必要。xAI はバージョン 1.2.0 以上が必要。
 
 ## 主な機能
 
@@ -140,6 +141,7 @@ google = (Your Gemini API key)
 perplexity = (Your Perplexity API key)
 mistral = (Your Mistral API key)
 deepseek = (Your DeepSeek API key)
+xai = (Your xAI API key)
 ```
 
 #### モデルとプロバイダーの選択
@@ -152,6 +154,7 @@ deepseek = (Your DeepSeek API key)
 - `-p` Perplexity
 - `-i` Mistral
 - `-d` DeepSeek
+- `-x` for xAI
 - `-l` local LLM
 
 また、`-m`オプションを使用してモデルを指定することもできます。例えば、OpenAIの`gpt-4o`モデルを使用するには：
@@ -177,6 +180,7 @@ APIキーは、環境変数として保存できます：
 - `PERPLEXITY_API_KEY` Perplexity用
 - `MISTRAL_API_KEY` Mistral用
 - `DEEPSEEK_API_KEY` DeepSeek用
+- `XAI_API_KEY` xAI用
 
 環境変数が設定されていない場合、`multiai`は設定ファイルの`[api_key]`セクションにあるキーを探します。
 
