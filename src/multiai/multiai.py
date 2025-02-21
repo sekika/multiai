@@ -135,6 +135,7 @@ class Prompt():
         self.perplexity_messages = []
         self.deepseek_messages = []
         self.mistral_messages = []
+        self.xai_messages = []
         self.local_messages = []
 
     def ask(self, prompt, request=1, verbose=False):
@@ -569,6 +570,41 @@ class Prompt():
             except Exception:
                 self.error_message = e
 
+    def ask_xai(self):
+        """
+        Ask a question to xAI.
+        """
+        if self.xai_api_key is None:
+            self.error = True
+            self.error_message = 'API key for xAI is not set.'
+            return
+        base_url = 'https://api.x.ai/v1'
+        client = openai.OpenAI(
+            api_key=self.xai_api_key,
+            base_url=base_url)
+        self.xai_messages += self.message
+        try:
+            self.completion = client.chat.completions.create(
+                messages=self.xai_messages,
+                model=self.model_xai,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            self.error = False
+            self.response = self.completion.choices[0].message.content.strip(
+            )
+            self.finish_reason = self.completion.choices[0].finish_reason
+            self.perplexity_messages += [{"role": "assistant",
+                                          "content": self.response}]
+        except openai.APIError as e:
+            self.error = True
+            try:
+                self.error_code = e.status_code
+                self.error_type = f"Error {self.error_code}"
+                self.error_message = f"{self.error_type}: {e.body}"
+            except Exception:
+                self.error_message = e
+
     def ask_local(self):
         """
         Ask a question to local language model.
@@ -619,6 +655,7 @@ class Provider(enum.Enum):
     PERPLEXITY = enum.auto()
     MISTRAL = enum.auto()
     DEEPSEEK = enum.auto()
+    XAI = enum.auto()
     LOCAL = enum.auto()
 
 

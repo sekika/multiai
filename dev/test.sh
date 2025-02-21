@@ -5,11 +5,12 @@ cp ../src/multiai/data/system.ini ../docs/_includes/system.ini
 echo '=== test'
 ai -o hi
 ai -a 土壌について
-ai -g 土壌について
+ai -g hi
 ai -p hi
 echo 'Skipping mistral test'
 # ai -i hi
 ai -d hi
+ai -x hi
 ai -l hi
 
 echo '=== autopep8'
