@@ -240,11 +240,11 @@ If the response is incomplete, `multiai` will request additional information unt
   ai -c "What is the capital of France?"
   ```
 
-- **Logging Chats:** Use the `-l` option to log the chat to a file named `chat-ai-DATE.md` in the current directory, where `DATE` is replaced by today’s date. The file name can be changed with the `log_file` key in the `[command]` section. If `always_log = yes` is set in the `[command]` section, this option is always enabled.
+- **Logging Chats:** Use the `-s` option to log the chat to a file named `chat-ai-DATE.md` in the current directory, where `DATE` is replaced by today’s date. The file name can be changed with the `log_file` key in the `[command]` section. If `always_log = yes` is set in the `[command]` section, this option is always enabled.
 
   Example usage:
   ```bash
-  ai -l Tell me a joke
+  ai -s Tell me a joke
   ```
 
 ### Command-Line Options
