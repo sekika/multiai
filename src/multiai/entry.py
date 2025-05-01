@@ -71,7 +71,7 @@ def entry():
         parser.add_argument('-c', '--copy',
                             action='store_true', help='copy the latest answer')
     if not client.always_log:
-        parser.add_argument('-l', '--log',
+        parser.add_argument('-s', '--save',
                             action='store_true', help=f'save log as {log_file}')
     args = parser.parse_args()
     # Get prompt
@@ -103,11 +103,11 @@ def entry():
     if client.always_copy:
         args.copy = True
     client.copy = args.copy
-    # -l option
+    # -s option
     if client.always_log:
-        args.log = True
-    client.log = args.log
-    if args.log:
+        args.save = True
+    client.log = args.save
+    if args.save:
         if not os.path.exists(log_file):
             try:
                 with open(log_file, 'w') as file:
