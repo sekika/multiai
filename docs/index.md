@@ -42,7 +42,7 @@
 | **xAI**  | [xAI](https://grok.com/) | [xAI Models](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
 
-- DeepSeek and Local LLM require version 1.1.0 or higher. xAI requres version 1.2.0 or higher.
+- DeepSeek and Local LLM require version 1.1.0 or higher. xAI requres version 1.2.0 or higher. See [release](release.md) for detail.
 
 ## Key Features
 

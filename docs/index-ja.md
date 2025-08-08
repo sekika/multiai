@@ -42,7 +42,7 @@
 | **xAI**  | [xAI](https://grok.com/) | [xAIモデル](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollamaモデル](https://ollama.com/search) |
 
-- DeepSeek と Local LLM はバージョン 1.1.0 以上が必要。xAI はバージョン 1.2.0 以上が必要。
+- DeepSeek と Local LLM はバージョン 1.1.0 以上が必要。xAI はバージョン 1.2.0 以上が必要。詳しくは[リリース](release.md)参照。
 
 ## 主な機能
 
