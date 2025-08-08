@@ -365,12 +365,13 @@ class Prompt():
         if not self.prompt_continue:
             self.openai_messages += self.message
         try:
-            if self.model[0] == 'o':
-                # o1 and o3 series do not support variable temperature and
-                # max_tokens
+            if self.model[:5] == 'gpt-5' or self.model[0] == 'o':
+                # gpt-5, o1 and o3 series do not support variable temperature and
+                # max_tokens is written as max_completion_tokens
                 self.completion = openai.chat.completions.create(
                     messages=self.openai_messages,
                     model=self.model_openai,
+                    max_completion_tokens=self.max_tokens
                 )
             else:
                 self.completion = openai.chat.completions.create(

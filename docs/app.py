@@ -12,20 +12,17 @@ from datetime import datetime
 st.set_page_config(page_title='Chotto GPT')
 document_url = 'https://sekika.github.io/multiai/'
 models = [
-    'gpt-4o',
-    'gpt-4o-mini',
-    'o3-mini',
-    'claude-3-5-sonnet-latest',
-    'claude-3-5-haiku-latest',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
+    'gpt-5',
+    'gpt-5-mini',
+    'claude-opus-4-0',
+    'claude-sonnet-4-0',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
     'sonar-pro',
     'sonar',
     'deepseek-chat',
     'deepseek-reasoner',
-    'grok-2-latest',
-    'mistral-large-latest',
-    'open-mistral-nemo']
+    'grok-4-latest']
 
 log_file = 'chat-ai-DATE.md'
 log_file = os.path.expanduser(log_file)
@@ -35,7 +32,7 @@ log_file = log_file.replace('DATE', datetime.today().strftime('%Y%m%d'))
 def get_provider(model):
     if 'mistral' in model:
         return 'mistral'
-    p = {'gp': 'openai', 'o3': 'openai', 'cl': 'anthropic', 'ge': 'google', 'so': 'perplexity', 'de': 'deepseek', 'gr': 'xai'}
+    p = {'gp': 'openai', 'cl': 'anthropic', 'ge': 'google', 'so': 'perplexity', 'de': 'deepseek', 'gr': 'xai'}
     if model[:2] in p:
         return p[model[:2]]
     st.write(f'''System message: `get_provider` function cannot get
