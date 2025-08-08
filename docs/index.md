@@ -315,7 +315,13 @@ If you change `pre_prompt` parameter, you can make various kinds of script.
 
 ### Running your local chat app
 
-You can run your local chat app using `streamlit`. Install `streamlit` by running the following command:
+You can run your local chat app using `streamlit`. 
+
+![Chotto GPT](chotto1.png)
+
+![Selecting model](chotto2.png)
+
+Install `streamlit` by running the following command:
 ```bash
 pip install streamlit
 ```

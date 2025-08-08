@@ -315,7 +315,13 @@ python english.py text.md > output.md
 
 ### ローカルチャットアプリの実行
 
-`streamlit`を使用してローカルチャットアプリを実行できます。以下のコマンドを実行して`streamlit`をインストールしてください。
+`streamlit`を使用してローカルチャットアプリを実行できます。
+
+![Chotto GPT](chotto1.png)
+
+![Selecting model](chotto2.png)
+
+以下のコマンドを実行して`streamlit`をインストールしてください。
 ```bash
 pip install streamlit
 ```
