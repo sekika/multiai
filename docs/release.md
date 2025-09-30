@@ -2,6 +2,9 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.3.2 - 2025/9/30
+- Migrated from pkg_resources to importlib.metadata as pkg_resources is being deprecated.
+
 ## 1.3.1 - 2025/8/8
 - Adapt to gpt-5 series
 
@@ -23,3 +26,4 @@ The release history is listed from newest to oldest. To check your installed ver
 ## See also
 - [Release at PyPI](https://pypi.org/project/multiai/#history)
 - [GitHub commits](https://github.com/sekika/multiai/commits)
+- [X post](https://x.com/seki/status/1972960513333371117)
