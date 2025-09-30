@@ -14,8 +14,8 @@ document_url = 'https://sekika.github.io/multiai/'
 models = [
     'gpt-5',
     'gpt-5-mini',
-    'claude-opus-4-0',
-    'claude-sonnet-4-0',
+    'claude-opus-4-1',
+    'claude-sonnet-4-5',
     'gemini-2.5-pro',
     'gemini-2.5-flash',
     'sonar-pro',
