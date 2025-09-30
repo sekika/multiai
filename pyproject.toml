@@ -17,7 +17,6 @@ dependencies = [
     'pypager',
     'pyperclip',
     'PyPDF2',
-    'setuptools',
     'trafilatura',
 ]
 requires-python = ">=3.10"
@@ -52,7 +51,7 @@ Documentation = "https://sekika.github.io/multiai/"
 Source = "https://github.com/sekika/multiai"
 
 [build-system]
-requires = ["setuptools>=67.6.1"]
+requires = ["setuptools>=67.6.1", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]

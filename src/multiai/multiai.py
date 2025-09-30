@@ -10,13 +10,13 @@ import ollama
 import openai
 import os
 import mistralai
-import pkg_resources
 import PyPDF2
 import pyperclip
 import requests
 import sys
 import trafilatura
 from io import BytesIO
+from importlib.metadata import distribution, PackageNotFoundError
 from .printlong import print_long
 
 __all__ = [
@@ -43,14 +43,24 @@ class Prompt():
         self.max_tokens_anthropic = 4096
         self.ai_providers = []
         # Load package data
-        distribution = pkg_resources.get_distribution('multiai')
-        self.version = distribution.version
-        metadata = distribution.get_metadata(distribution.PKG_INFO)
-        for line in metadata.splitlines():
-            if line.startswith('Summary:'):
-                self.description = line.split(':', 1)[1].strip()
-            elif line.startswith('Project-URL: Homepage,'):
-                self.url = line.split(', ', 1)[1].strip()
+        try:
+            dist = distribution('multiai')
+            self.version = dist.version
+            md = dist.metadata  # email.message.Message
+            self.description = (md.get('Summary') or '').strip()
+            # Project-URL: Homepage, https://... or Home-page
+            self.url = None
+            for item in md.get_all('Project-URL') or []:
+                label, _, link = item.partition(', ')
+                if label.strip().lower() == 'homepage' and link:
+                    self.url = link.strip()
+                    break
+            if not self.url:
+                self.url = (md.get('Home-page') or '').strip() or None
+        except PackageNotFoundError:
+            self.version = None
+            self.description = None
+            self.url = None
         # Load user setting from config file in the order of
         # data/system.ini, ~/.multiai, .multai
         # It overwrites the system default values
