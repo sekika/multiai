@@ -2,6 +2,12 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.4.0 - 2025/10/10
+- New: file attachments for text-like inputs (CLI and library). Special handling for txt/md/pdf/docx/html/htm/csv; unknown extensions accepted if valid UTF-8 text (no NUL bytes), otherwise rejected.
+- New: CLI options -f/--file and --attach-limit (auto-summarizes oversized attachments with a notice); when no prompt is provided, attachments are applied only to the first turn before entering interactive mode.
+- New: library helpers retrieve_from_file(), summarize_text(), and attach_char_limit config.
+- Change: removed -f/--factual option (breaking change); added dependency on python-docx for .docx support.
+
 ## 1.3.2 - 2025/9/30
 - Migrated from pkg_resources to importlib.metadata as pkg_resources is being deprecated.
 
@@ -26,4 +32,4 @@ The release history is listed from newest to oldest. To check your installed ver
 ## See also
 - [Release at PyPI](https://pypi.org/project/multiai/#history)
 - [GitHub commits](https://github.com/sekika/multiai/commits)
-- [X post](https://x.com/seki/status/1972960513333371117)
+- [X post](https://x.com/seki/status/1976601995428745238)
