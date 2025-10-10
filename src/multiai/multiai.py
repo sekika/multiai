@@ -1,5 +1,5 @@
 """
-multiai - A Python library for text-based AI interactions
+multiai - A Python library for text-based AI interactions with multi-provider support.
 """
 import anthropic
 import configparser
@@ -18,6 +18,8 @@ import trafilatura
 from io import BytesIO
 from importlib.metadata import distribution, PackageNotFoundError
 from .printlong import print_long
+import docx  # python-docx
+from docx import Document
 
 __all__ = [
     "Prompt",
@@ -98,6 +100,11 @@ class Prompt():
         # Default values are given by fallback values.
         self.max_tokens = inifile.getint(
             'default', 'max_tokens', fallback=None)
+
+        # From version 1.4.0: attachment character limit (per attachment)
+        self.attach_char_limit = inifile.getint(
+            'default', 'attach_char_limit', fallback=40000)
+
         for provider in Provider:
             env = os.getenv(provider.name + '_API_KEY')
             name = provider.name.lower()
@@ -111,7 +118,7 @@ class Prompt():
 
     def set_provider(self, provider):
         """
-        Set AI provider
+        Set AI provider.
 
         :param provider: str
             AI provider (case insensitive)
@@ -124,9 +131,9 @@ class Prompt():
 
     def set_model(self, provider, model):
         """
-        Set model
+        Set model.
 
-        :param prvider: str
+        :param provider: str
             AI provider (case insensitive)
         :param model: str
             AI model
@@ -153,11 +160,11 @@ class Prompt():
         Ask a question to AI.
 
         :param prompt: str
-            prompt to ask AI
+            Prompt to ask AI
         :param request: int
-            numbers of repetitive request
-        :param verbose: boolean
-            show repeat process
+            Numbers of repetitive requests when the response is cut by token limit
+        :param verbose: bool
+            Show repeat process
         :return: str
             Answer from AI
         """
@@ -206,14 +213,71 @@ class Prompt():
             return answer
         return response + answer
 
-    def ask_print(self, prompt, prompt_summary=None):
+    def ask_once(self, prompt):
         """
-        Ask a question to AI and print, copy, log
+        Ask a single-turn question without polluting the chat history.
+
+        This calls the same provider but restores all internal message lists
+        after the request completes.
 
         :param prompt: str
-            prompt to ask AI
+            Prompt to ask AI
+        :return: str
+            Answer from AI
+        """
+        # Backup histories
+        backups = {
+            'openai_messages': list(self.openai_messages),
+            'anthropic_messages': list(self.anthropic_messages),
+            'google_chat': self.google_chat,
+            'perplexity_messages': list(self.perplexity_messages),
+            'deepseek_messages': list(self.deepseek_messages),
+            'mistral_messages': list(self.mistral_messages),
+            'xai_messages': list(self.xai_messages),
+            'local_messages': list(self.local_messages),
+        }
+        # Ask
+        answer = self.ask(prompt)
+        # Restore histories regardless of error
+        self.openai_messages = backups['openai_messages']
+        self.anthropic_messages = backups['anthropic_messages']
+        self.google_chat = backups['google_chat']
+        self.perplexity_messages = backups['perplexity_messages']
+        self.deepseek_messages = backups['deepseek_messages']
+        self.mistral_messages = backups['mistral_messages']
+        self.xai_messages = backups['xai_messages']
+        self.local_messages = backups['local_messages']
+        return answer
+
+    def summarize_text(self, text, max_words_hint=600):
+        """
+        Summarize a long piece of text.
+
+        Uses ask_once() to avoid altering conversation history.
+
+        :param text: str
+            Raw text to summarize
+        :param max_words_hint: int
+            A rough upper bound to guide the summary length
+        :return: str
+            Summarized text (best-effort)
+        """
+        prompt = (
+            "Summarize the following content concisely. Preserve key facts, structure, and any code blocks. "
+            f"Target up to roughly {max_words_hint} words. Do not include commentary about being an AI.\n\n"
+            "Content begins below:\n\n"
+            f"{text}"
+        )
+        return self.ask_once(prompt)
+
+    def ask_print(self, prompt, prompt_summary=None):
+        """
+        Ask a question to AI and print, copy, log.
+
+        :param prompt: str
+            Prompt to ask AI
         :param prompt_summary: str
-            prompt shortened for logging
+            Prompt shortened for logging
         """
         print(f'{self.color("Please wait ......")}\r', end='')
         if len(self.ai_providers) == 1:
@@ -261,10 +325,10 @@ class Prompt():
 
     def interactive(self, pre_prompt=''):
         """
-        Interactive mode
+        Interactive mode.
 
         :param pre_prompt: str
-            pre-prompt to append before prompt
+            Pre-prompt to append before prompt
         """
         prompt = ''
         blank = 0
@@ -307,12 +371,12 @@ class Prompt():
 
     def color(self, text):
         """
-        Return colored text with color defined at self.prompt_color
+        Return colored text with color defined at self.prompt_color.
 
         :param text: str
             Text
         :return: str
-            Colored text
+            Colored text (no color if not TTY)
         """
         if sys.stdout.isatty():
             return f'\033[{self.prompt_color}m{text}\033[0m'
@@ -327,8 +391,8 @@ class Prompt():
 
         :param url: str
             URL to retrieve data from
-        :param verbose: boolean
-            whether to print message
+        :param verbose: bool
+            Whether to print message
         :return: str
             Retrieved text
         """
@@ -360,6 +424,102 @@ class Prompt():
                 if verbose:
                     print(f'{url} could not be retrieved.')
                 sys.exit(1)
+        return text
+
+    def retrieve_from_file(self, source, filename=None, verbose=True):
+        """
+        Retrieve text from a file path or bytes.
+
+        Supported extensions (special handling): txt, md, pdf, docx, html/htm, csv.
+        For unknown extensions, if the content is valid UTF-8 text (no NUL bytes and UTF-8 decodable),
+        it will be treated as plain text; otherwise an error is raised.
+
+        :param source: str | bytes | file-like
+            File path (str) or in-memory bytes (e.g., from upload).
+        :param filename: str | None
+            Original file name (used for extension detection and messages).
+        :param verbose: bool
+            Whether to print progress messages
+        :return: str
+            Extracted text
+        """
+        def _ext_from_name(name):
+            return os.path.splitext(name)[1].lower()
+
+        # Determine extension and load bytes
+        if isinstance(source, (str, os.PathLike)):
+            path = os.fspath(source)
+            ext = _ext_from_name(path)
+            if verbose:
+                print('Reading file ...\r', end='')
+            with open(path, 'rb') as f:
+                data = f.read()
+            name = os.path.basename(path)
+        else:
+            # in-memory data
+            if hasattr(source, 'read'):
+                data = source.read()
+            else:
+                data = source
+            if not isinstance(data, (bytes, bytearray)):
+                print('retrieve_from_file expects bytes/file-like for in-memory data.')
+                sys.exit(1)
+            if not filename:
+                print('filename is required when passing in-memory data.')
+                sys.exit(1)
+            name = filename
+            ext = _ext_from_name(filename)
+
+        if verbose:
+            print('Converting file to text.\r', end='')
+
+        try:
+            if ext in ['.txt', '.md', '.csv']:
+                # Known simple text types: decode as UTF-8 (replace errors to
+                # avoid crash)
+                text = data.decode('utf-8', errors='replace')
+
+            elif ext == '.pdf':
+                with BytesIO(data) as pdf_file:
+                    reader = PyPDF2.PdfReader(pdf_file)
+                    text = ""
+                    for page in range(len(reader.pages)):
+                        text += reader.pages[page].extract_text()
+
+            elif ext == '.docx':
+                if Document is None:
+                    print('python-docx is not installed. Please install "python-docx".')
+                    sys.exit(1)
+                with BytesIO(data) as stream:
+                    doc = Document(stream)
+                    text = "\n".join(p.text for p in doc.paragraphs)
+
+            elif ext in ['.html', '.htm']:
+                html = data.decode('utf-8', errors='replace')
+                text = trafilatura.extract(html)
+                if text is None:
+                    print(f'{name} could not be converted from HTML.')
+                    sys.exit(1)
+
+            else:
+                # Unknown extension: treat as text only if it is valid UTF-8
+                # and not binary.
+                if b'\x00' in data:
+                    print(
+                        f'Unsupported file type or binary content detected: {name}')
+                    sys.exit(1)
+                try:
+                    # strict; will fail if not UTF-8
+                    text = data.decode('utf-8')
+                except UnicodeDecodeError:
+                    print(
+                        f'{name} is not a supported file format or not UTF-8 text.')
+                    sys.exit(1)
+
+        except Exception as e:
+            print(f'Failed to parse {name}: {e}')
+            sys.exit(1)
+
         return text
 
     # Implementations for each providers
@@ -443,7 +603,7 @@ class Prompt():
         """
         Ask a question to Google.
         """
-        # Supress logging warnings of libraries
+        # Suppress logging warnings of libraries
         os.environ["GRPC_VERBOSITY"] = "ERROR"
         os.environ["GLOG_minloglevel"] = "2"
         if self.google_api_key is None:
@@ -500,9 +660,6 @@ class Prompt():
         except openai.APIError as e:
             self.error = True
             try:
-                # print(f'e = {e.__dict__.keys()}')
-                # for key in e.__dict__.keys():
-                #     print(f'e.{key} = {getattr(e, key)}')
                 message = trafilatura.extract(e.message)
                 self.error_message = message.splitlines()[0]
             except Exception:
@@ -636,9 +793,6 @@ class Prompt():
             self.error = True
             self.error_message = f'{e}\nInstall ollama and run "ollama serve".'
         except Exception as e:
-            # print(f'e = {e.__dict__.keys()}')
-            # for key in e.__dict__.keys():
-            #     print(f'e.{key} = {getattr(e, key)}')
             self.error = True
             try:
                 self.error_code = e.status_code
@@ -655,10 +809,10 @@ class Provider(enum.Enum):
 
     To add a provider definition,
     (1) Add the provider here. Note that the first letter should not
-        overwrap other command-line options
-    (2) Define ask_provider() function in Prompt class
-    (3) Update clear() function in Prompt class
-    (4) Define default model at system.ini
+        overwrap other command-line options.
+    (2) Define ask_provider() function in Prompt class.
+    (3) Update clear() function in Prompt class.
+    (4) Define default model at system.ini.
     """
     OPENAI = enum.auto()
     ANTHROPIC = enum.auto()
