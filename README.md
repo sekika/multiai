@@ -21,6 +21,7 @@
 - **Pager for Long Responses:** View lengthy responses conveniently using a pager.
 - **Continuation Handling:** Automatically handle and request continuations if responses are cut off.
 - **Automatic Chat Logging:** Automatically save your chat history for future reference.
+- **File Attachments:** Attach files as additional context.
 
 ## Usage
 
