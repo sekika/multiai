@@ -42,15 +42,16 @@
 | **xAI**  | [xAI](https://grok.com/) | [xAI Models](https://docs.x.ai/docs/models) |
 | **Local LLM**  | [Ollama](https://ollama.com/) | [Ollama Models](https://ollama.com/search) |
 
-- DeepSeek and Local LLM require version 1.1.0 or higher. xAI requres version 1.2.0 or higher. See [release](release.md) for detail.
+- DeepSeek and Local LLM require version 1.1.0 or higher. xAI requires version 1.2.0 or higher. File attachment feature requires version 1.4.0 or higher. See [release](release.md) for details.
 
 ## Key Features
 
-- **Interactive Chat:** Communicate with AI directly from your terminal.
-- **Multi-Line Input:** Supports multi-line prompts for complex queries.
-- **Pager for Long Responses:** View lengthy responses conveniently using a pager.
-- **Continuation Handling:** Automatically handle and request continuations if responses are cut off.
-- **Automatic Chat Logging:** Automatically save your chat history for future reference.
+- Interactive Chat: Communicate with AI directly from your terminal.
+- Multi-Line Input: Supports multi-line prompts for complex queries.
+- Pager for Long Responses: View lengthy responses conveniently using a pager.
+- Continuation Handling: Automatically handle and request continuations if responses are cut off.
+- Automatic Chat Logging: Automatically save your chat history for future reference.
+- File Attachments (added in 1.4.0): Attach files as additional context.
 
 ## Getting Started
 
@@ -109,8 +110,8 @@ Once your API key is set up, you can start interacting with the AI:
 
 In interactive mode, you can input multi-line text and control when the input is finished using the `blank_lines` parameter in the `[command]` section of the settings file. Here’s how it works:
 
-- **Single-Line Input:** By default, input is finished when you press Enter after a line.
-- **Multi-Line Input:** If you set `blank_lines = 1`, input will finish only after a blank line (i.e., pressing Enter twice). This is particularly useful when you want to copy and paste text with multiple lines. If your input includes blank lines, increase the `blank_lines` parameter accordingly.
+- Single-Line Input: By default, input is finished when you press Enter after a line.
+- Multi-Line Input: If you set `blank_lines = 1`, input will finish only after a blank line (i.e., pressing Enter twice). This is particularly useful when you want to copy and paste text with multiple lines. If your input includes blank lines, increase the `blank_lines` parameter accordingly.
 
 Interactive mode can be exited by:
 
@@ -124,9 +125,9 @@ Interactive mode can be exited by:
 
 `multiai` reads its settings from a configuration file, which can be located in the following order of precedence:
 
-1. **System Default:** [system default settings](https://github.com/sekika/multiai/blob/master/src/multiai/data/system.ini)
-2. **User-Level:** `~/.multiai`
-3. **Project-Level:** `./.multiai`
+1. System Default: [system default settings](https://github.com/sekika/multiai/blob/master/src/multiai/data/system.ini)
+2. User-Level: `~/.multiai`
+3. Project-Level: `./.multiai`
 
 Settings from the latter files overwrite those from the former.
 
@@ -206,46 +207,37 @@ If the response is incomplete, `multiai` will request additional information unt
 
 ### Input Options
 
-`multiai` provides several command-line options to simplify specific types of prompts:
+- `-e` Option: Adds a pre-prompt to correct or translate English text. This pre-prompt is defined in the `english` parameter in the `[prompt]` section of the settings file.
 
-- **`-e` Option:** Adds a pre-prompt to correct or translate English text. This pre-prompt is defined in the `english` parameter in the `[prompt]` section of the settings file.
-  
-  Example usage:
+  Example:
   ```bash
   ai -e This are a test
   ```
-  
-- **`-f` Option:** Adds a pre-prompt to prevent hallucination or fabricated information. This is defined in the `factual` parameter in the settings file.
 
-  Example usage:
-  ```bash
-  ai -f Explain quantum mechanics
-  ```
-  
-- **`-u URL` Option:** Automatically retrieves and converts the content of a given URL to text. If the URL ends in `.pdf`, the content of the PDF file is also converted to text. The program will summarize the text based on a pre-prompt and then allow for further interactive queries about the content. If you want the program to summarize in your native language, rewrite the pre-prompt defined in the `url` parameter in the settings file in your language.
+- `-f FILE [FILE ...]` Option (added in 1.4.0): Attach one or more files as additional context. Supported with special handling: txt, md, pdf, docx, html/htm, csv. Unknown extensions are accepted if the content is valid UTF-8 text (no NUL bytes); otherwise the file is rejected as unsupported.
+  - `--attach-limit N` (added in 1.4.0): Per-attachment character limit. If an attachment exceeds this limit, it is auto-summarized and a message is shown indicating the overage.
+  - If no prompt is provided (e.g., `ai -f notes.md`), attachments are applied to the first turn only; then `multiai` enters interactive mode for subsequent turns.
+  - Example:
+    ```bash
+    ai "Summarize these materials" -f a.pdf b.docx --attach-limit 50000
+    ai -f notes.md
+    ```
 
-  Example usage:
+- `-u URL` Option: Automatically retrieves and converts the content of a given URL to text. If the URL ends in `.pdf`, the content of the PDF file is also converted to text. The program will summarize the text based on a pre-prompt and then allow for further interactive queries about the content. If you want the program to summarize in your native language, rewrite the pre-prompt defined in the `url` parameter in the settings file in your language.
+
+  Example:
   ```bash
   ai -u https://en.wikipedia.org/wiki/Artificial_intelligence
   ```
 
+Note:
+- In 1.4.0, the old `-f/--factual` option was removed. If you need a factuality-focused pre-prompt, include it manually in your prompt text or your settings.
+
 ### Output Options
 
-- **Paging Long Responses:** If a response exceeds one page in your terminal, `multiai` uses [pypager](https://pypi.org/project/pypager/) to display it.
-
-- **Copy to Clipboard:** Use the `-c` option to copy the last response to the clipboard. If `always_copy = yes` is set in the `[command]` section of the settings file, this option is always enabled.
-
-  Example usage:
-  ```bash
-  ai -c "What is the capital of France?"
-  ```
-
-- **Logging Chats:** Use the `-s` option to log the chat to a file named `chat-ai-DATE.md` in the current directory, where `DATE` is replaced by today’s date. The file name can be changed with the `log_file` key in the `[command]` section. If `always_log = yes` is set in the `[command]` section, this option is always enabled.
-
-  Example usage:
-  ```bash
-  ai -s Tell me a joke
-  ```
+- Paging Long Responses: If a response exceeds one page in your terminal, `multiai` uses [pypager](https://pypi.org/project/pypager/) to display it.
+- Copy to Clipboard: Use the `-c` option to copy the last response to the clipboard. If `always_copy = yes` is set in the `[command]` section of the settings file, this option is always enabled.
+- Logging Chats: Use the `-s` option to log the chat to a file named `chat-ai-DATE.md` in the current directory, where `DATE` is replaced by today’s date. The file name can be changed with the `log_file` key in the `[command]` section. If `always_log = yes` is set in the `[command]` section, this option is always enabled.
 
 ### Command-Line Options
 
@@ -311,6 +303,7 @@ Then the translated English is shown. If you want to save it to `output.md`, jus
 ```
 python english.py text.md > output.md
 ```
+
 If you change `pre_prompt` parameter, you can make various kinds of script.
 
 ### Running your local chat app
@@ -332,7 +325,7 @@ Download [app.py](https://github.com/sekika/multiai/blob/main/docs/app.py) and r
 streamlit run app.py
 ```
 
-Once the server is running, your default web browser will open and display the chat application, Chotto GPT. This app allows you to easily select from a variety of AI models from different providers and engage in conversations with them. You can customize the list of available models and the log file location by directly editing the source code.
+Once the server is running, your default web browser will open and display the chat application, Chotto GPT. This app allows you to easily select from a variety of AI models from different providers and engage in conversations with them. It also supports uploading files (any extension). Uploaded files are processed in memory and included as context in the next message if you enable it. You can customize the list of available models and the log file location by directly editing the source code.
 
 ### Running on Google Colab
 
