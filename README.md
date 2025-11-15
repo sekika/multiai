@@ -94,3 +94,5 @@ The manual includes the following sample codes:
 
 - A script that translates a text file into English.
 - A local chat app that allows you to easily select from various AI models provided by different providers and engage in conversations with them.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sekika/multiai)
