@@ -171,7 +171,8 @@ def entry():
         base_prompt = prompt_url
         print(
             f'{client.color(client.role)}> {base_prompt}\n\nAttachments: {", ".join(attached_names)}')
-        prompt_summary = f'{prompt_url}\n\nAttachments: {", ".join(attached_names)}'
+        prompt_summary = f'{prompt_url}\n\nAttachments: {
+            ", ".join(attached_names)}'
         one_shot_prompt = base_prompt + '\n' + attachments_section
         client.ask_print(one_shot_prompt, prompt_summary=prompt_summary)
         did_one_shot_with_attachments = True
@@ -197,7 +198,8 @@ def entry():
         # Prompt provided; attach attachments immediately and send once
         if attachments_section:
             # For logging, keep a concise summary line about attachments
-            prompt_summary = f'{prompt}\n\nAttachments: {", ".join(attached_names)}'
+            prompt_summary = f'{prompt}\n\nAttachments: {
+                ", ".join(attached_names)}'
             prompt = pre_prompt + prompt + '\n\n' + attachments_section
             client.ask_print(prompt, prompt_summary=prompt_summary)
         else:

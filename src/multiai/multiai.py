@@ -205,7 +205,9 @@ class Prompt():
             return self.response
         if verbose:
             print(
-                f'{self.color("Repeating...")} max_requests = {self.max_requests}, requests = {request}\r',
+                f'{
+                    self.color("Repeating...")} max_requests = {
+                    self.max_requests}, requests = {request}\r',
                 end='')
         response = self.response
         answer = self.ask('continue', request=request, verbose=verbose)
@@ -561,8 +563,12 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body
-                self.error_type = f"Error {self.error_code}: {self.error_dict['code']}"
-                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
+                self.error_type = f"Error {
+                    self.error_code}: {
+                    self.error_dict['code']}"
+                self.error_message = f"{
+                    self.error_type}\n{
+                    self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -594,8 +600,12 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body['error']
-                self.error_type = f"{self.error_code}: {self.error_dict['type']}"
-                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
+                self.error_type = f"{
+                    self.error_code}: {
+                    self.error_dict['type']}"
+                self.error_message = f"{
+                    self.error_type}\n{
+                    self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -619,7 +629,8 @@ class Prompt():
             self.google_messages = []
 
         if not self.prompt_continue:
-            self.google_messages += self.message  # {"role":"user","content":...}
+            # {"role":"user","content":...}
+            self.google_messages += self.message
 
         contents = []
         for m in self.google_messages:
@@ -676,7 +687,8 @@ class Prompt():
             except Exception:
                 pass
 
-            self.google_messages += [{"role": "assistant", "content": self.response}]
+            self.google_messages += [{"role": "assistant",
+                                      "content": self.response}]
 
         except Exception as e:
             self.error = True
@@ -752,8 +764,12 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body
-                self.error_type = f"Error {self.error_code}: {self.error_dict['code']}"
-                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
+                self.error_type = f"Error {
+                    self.error_code}: {
+                    self.error_dict['code']}"
+                self.error_message = f"{
+                    self.error_type}\n{
+                    self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -785,7 +801,9 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = json.loads(e.body)
-                self.error_message = f"Error {self.error_code}: {self.error_dict['message']}"
+                self.error_message = f"Error {
+                    self.error_code}: {
+                    self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -814,7 +832,7 @@ class Prompt():
             )
             self.finish_reason = self.completion.choices[0].finish_reason
             self.xai_messages += [{"role": "assistant",
-                                          "content": self.response}]
+                                   "content": self.response}]
         except openai.APIError as e:
             self.error = True
             try:
@@ -849,7 +867,8 @@ class Prompt():
                 self.error_code = e.status_code
                 self.error_message = e.error
                 if self.error_code == 404:
-                    self.error_message += f'\nRun "ollama pull {self.model}" and try again.'
+                    self.error_message += f'\nRun "ollama pull {
+                        self.model}" and try again.'
             except Exception:
                 self.error_message = e
 
