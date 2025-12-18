@@ -14,11 +14,9 @@ document_url = 'https://sekika.github.io/multiai/'
 
 # Models (editable)
 models = [
-    'gpt-5',
-    'gpt-5-mini',
-    'claude-opus-4-1',
+    'gpt-5.2',
     'claude-sonnet-4-5',
-    'gemini-2.5-pro',
+    'gemini-3-pro-preview',
     'gemini-2.5-flash',
     'sonar-pro',
     'sonar',
