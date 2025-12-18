@@ -10,7 +10,7 @@ authors = [
 dependencies = [
     "openai",
     "anthropic",
-    "google-generativeai",
+    "google-genai",
     "requests",
     "mistralai",
     "ollama",

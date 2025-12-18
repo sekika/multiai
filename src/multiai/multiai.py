@@ -4,7 +4,7 @@ multiai - A Python library for text-based AI interactions with multi-provider su
 import anthropic
 import configparser
 import enum
-import google.generativeai as genai
+from google import genai
 import json
 import ollama
 import openai
@@ -148,7 +148,7 @@ class Prompt():
         """
         self.openai_messages = []
         self.anthropic_messages = []
-        self.google_chat = None
+        self.google_messages = []
         self.perplexity_messages = []
         self.deepseek_messages = []
         self.mistral_messages = []
@@ -196,7 +196,7 @@ class Prompt():
             return self.response
         # Unexpected finish reason
         if self.finish_reason not in ['length', 'max_tokens']:
-            self.response += '\n\nFinish reason: {self.finish_reason}'
+            self.response += f'\n\nFinish reason: {self.finish_reason}'
             return self.response
         # Response not finished. Continue the request.
         request += 1
@@ -229,7 +229,7 @@ class Prompt():
         backups = {
             'openai_messages': list(self.openai_messages),
             'anthropic_messages': list(self.anthropic_messages),
-            'google_chat': self.google_chat,
+            'google_messages': list(self.google_messages),
             'perplexity_messages': list(self.perplexity_messages),
             'deepseek_messages': list(self.deepseek_messages),
             'mistral_messages': list(self.mistral_messages),
@@ -241,7 +241,7 @@ class Prompt():
         # Restore histories regardless of error
         self.openai_messages = backups['openai_messages']
         self.anthropic_messages = backups['anthropic_messages']
-        self.google_chat = backups['google_chat']
+        self.google_messages = backups['google_messages']
         self.perplexity_messages = backups['perplexity_messages']
         self.deepseek_messages = backups['deepseek_messages']
         self.mistral_messages = backups['mistral_messages']
@@ -601,35 +601,86 @@ class Prompt():
 
     def ask_google(self):
         """
-        Ask a question to Google.
+        Ask a question to Google (google.genai).
         """
         # Suppress logging warnings of libraries
         os.environ["GRPC_VERBOSITY"] = "ERROR"
         os.environ["GLOG_minloglevel"] = "2"
+
         if self.google_api_key is None:
             self.error = True
             self.error_message = 'API key for Google is not set.'
             return
-        genai.configure(api_key=self.google_api_key)
-        model = genai.GenerativeModel(self.model_google)
-        if self.google_chat is None:
-            self.google_chat = model.start_chat(history=[])
-        config = genai.types.GenerationConfig(
-            temperature=self.temperature,
-            max_output_tokens=self.max_tokens)
+
+        # google.genai client
+        client = genai.Client(api_key=self.google_api_key)
+
+        if not hasattr(self, "google_messages"):
+            self.google_messages = []
+
+        if not self.prompt_continue:
+            self.google_messages += self.message  # {"role":"user","content":...}
+
+        contents = []
+        for m in self.google_messages:
+            role = m.get("role", "user")
+            if role == "assistant":
+                role = "model"
+            elif role == "system":
+                role = "user"
+
+            contents.append({
+                "role": role,
+                "parts": [{"text": m.get("content", "")}],
+            })
+
+        # generation config
+        config = {}
+        if self.temperature is not None:
+            config["temperature"] = float(self.temperature)
+        if self.max_tokens is not None:
+            # google.genai は max_output_tokens
+            config["max_output_tokens"] = int(self.max_tokens)
+
         try:
-            self.completion = self.google_chat.send_message(
-                self.prompt, generation_config=config)
-            self.error = False
-            self.response = self.completion.text.replace('•', '* ').strip()
-            self.finish_reason = self.completion.candidates[0].finish_reason.name.lower(
+            resp = client.models.generate_content(
+                model=self.model_google,
+                contents=contents,
+                config=config if config else None,
             )
+            self.error = False
+            text = getattr(resp, "text", None)
+            if not text:
+                text = ""
+                try:
+                    cand0 = resp.candidates[0]
+                    parts = cand0.content.parts
+                    text = "".join(getattr(p, "text", "") for p in parts)
+                except Exception:
+                    pass
+
+            self.response = (text or "").replace('•', '* ').strip()
+
+            # finish_reason
+            self.finish_reason = "stop"
+            try:
+                fr = resp.candidates[0].finish_reason
+                name = getattr(fr, "name", None)
+                if name:
+                    self.finish_reason = str(name).lower()
+                else:
+                    s = str(fr).strip().lower()
+                    if "." in s:
+                        s = s.split(".")[-1]
+                    self.finish_reason = s
+            except Exception:
+                pass
+
+            self.google_messages += [{"role": "assistant", "content": self.response}]
+
         except Exception as e:
             self.error = True
-            try:
-                self.error_message = e.message
-            except Exception:
-                self.error_message = e
+            self.error_message = str(e)
 
     def ask_perplexity(self):
         """
@@ -762,7 +813,7 @@ class Prompt():
             self.response = self.completion.choices[0].message.content.strip(
             )
             self.finish_reason = self.completion.choices[0].finish_reason
-            self.perplexity_messages += [{"role": "assistant",
+            self.xai_messages += [{"role": "assistant",
                                           "content": self.response}]
         except openai.APIError as e:
             self.error = True
