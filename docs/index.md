@@ -65,11 +65,7 @@ pip install multiai
 
 ### Setting Up Your Environment
 
-Before using `multiai`, configure your API key(s) for your chosen AI provider(s). Set your API key as an environment variable or in a user-setting file:
-
-```bash
-export OPENAI_API_KEY=your_openai_api_key_here
-```
+Before using `multiai`, configure your API key(s) for your chosen AI provider(s) as descibed in [API Key Management](#api-key-management).
 
 ### Basic Usage
 

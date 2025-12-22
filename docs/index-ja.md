@@ -65,11 +65,7 @@ pip install multiai
 
 ### 環境設定
 
-`multiai`を使用する前に、選択したAIプロバイダーのAPIキーを設定します。APIキーは環境変数として、またはユーザー設定ファイルで設定できます：
-
-```bash
-export OPENAI_API_KEY=your_openai_api_key_here
-```
+`multiai`を使用する前に、選択したAIプロバイダーのAPIキーを[APIキー管理](#apiキー管理)に従って設定してください。
 
 ### 基本的な使い方
 
