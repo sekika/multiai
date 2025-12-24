@@ -35,8 +35,6 @@ class TestPromptCore:
         client.set_provider('OPENAI')
         
         # FIX: The Prompt class requires .model to be set before calling ask_openai.
-        # In the CLI (entry.py), this is done automatically, but in unit tests 
-        # or standalone library usage, it must be set manually if relying on default config.
         client.model = client.model_openai
 
         response = client.ask("Hi")
@@ -56,9 +54,10 @@ class TestPromptCore:
         text = client.retrieve_from_file(str(p), verbose=False)
         assert text == "Hello file content"
 
-    @patch('multiai.multiai.PyPDF2.PdfReader')
+    # Changed from PyPDF2.PdfReader to pypdf.PdfReader
+    @patch('multiai.multiai.pypdf.PdfReader')
     def test_retrieve_from_file_pdf(self, mock_pdf_reader, mock_config):
-        """Test PDF extraction logic (mocking PyPDF2)."""
+        """Test PDF extraction logic (mocking pypdf)."""
         client = Prompt()
         
         # Mock PDF reader behavior

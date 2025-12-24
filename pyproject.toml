@@ -16,7 +16,7 @@ dependencies = [
     "ollama",
     "pypager",
     "pyperclip",
-    "PyPDF2",
+    "pypdf",
     "trafilatura",
     "python-docx",
 ]

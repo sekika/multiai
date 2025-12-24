@@ -10,7 +10,7 @@ import ollama
 import openai
 import os
 import mistralai
-import PyPDF2
+import pypdf
 import pyperclip
 import requests
 import sys
@@ -416,7 +416,7 @@ class Prompt():
             print('Converting to text.\r', end='')
         if url.lower().endswith('.pdf'):
             with BytesIO(response.content) as pdf_file:
-                reader = PyPDF2.PdfReader(pdf_file)
+                reader = pypdf.PdfReader(pdf_file)
                 text = ""
                 for page in range(len(reader.pages)):
                     text += reader.pages[page].extract_text()
@@ -483,7 +483,7 @@ class Prompt():
 
             elif ext == '.pdf':
                 with BytesIO(data) as pdf_file:
-                    reader = PyPDF2.PdfReader(pdf_file)
+                    reader = pypdf.PdfReader(pdf_file)
                     text = ""
                     for page in range(len(reader.pages)):
                         text += reader.pages[page].extract_text()
@@ -670,7 +670,7 @@ class Prompt():
                 except Exception:
                     pass
 
-            self.response = (text or "").replace('•', '* ').strip()
+            self.response = (text or "").replace('• ', '* ').strip()
 
             # finish_reason
             self.finish_reason = "stop"
