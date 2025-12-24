@@ -2,6 +2,9 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.4.2 - 2025/12/24
+- Replaced deprecated PyPDF2 with pypdf.
+
 ## 1.4.1 - 2025/12/18
 - Migrated Gemini client from google.generativeai to google.genai as google.generativeai is being [deprecated](https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md).
 
