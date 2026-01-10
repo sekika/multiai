@@ -872,6 +872,117 @@ class Prompt():
             except Exception:
                 self.error_message = e
 
+    def list_models(self):
+        """
+        Retrieves and prints the list of available models for the currently selected AI provider.
+
+        This method dynamically dispatches the call to a specific `list_models_<provider>`
+        function based on the `self.ai_provider` attribute. If the specific function is 
+        not defined, it prints an error message and exits the program.
+        """
+        func_name = 'list_models_' + self.ai_provider.name.lower()
+        try:
+            func = getattr(self, func_name)
+        except AttributeError:
+            print(
+                f'multiai system error: {func_name}() function is not defined.')
+            sys.exit(1)
+        models = func()
+        for m in models:
+            print(m)
+
+    def _list_models_openai_compatible(self, api_key, base_url):
+        """
+        Helper method to fetch model lists from OpenAI-compatible APIs.
+
+        Args:
+            api_key (str): The API key for authentication.
+            base_url (str): The base URL of the API endpoint.
+
+        Returns:
+            list[str]: A list of model IDs available at the endpoint. Returns an error message if an error occurs.
+        """
+        try:
+            client = openai.OpenAI(api_key=api_key, base_url=base_url)
+            models = []
+            for m in client.models.list():
+                models.append(m.id)
+            return models
+        except Exception as e:
+            return [f"Error fetching models from {base_url}: {e}", ]
+
+    def list_models_openai(self):
+        """
+        Retrieves the list of available models from the official OpenAI API.
+        """
+        return self._list_models_openai_compatible(
+            api_key=self.openai_api_key,
+            base_url="https://api.openai.com/v1"
+        )
+
+    def list_models_anthropic(self):
+        """
+        Returns a reference to Anthropic's model documentation.
+        Note: Anthropic does not currently provide a standardized endpoint for listing models dynamically.
+        """
+        return [
+            "See https://platform.claude.com/docs/en/about-claude/models/overview",
+        ]
+
+    def list_models_google(self):
+        """
+        Retrieves the list of available Gemini models via Google's OpenAI-compatible API endpoint.
+        """
+        base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+        return self._list_models_openai_compatible(
+            api_key=self.google_api_key,
+            base_url=base_url
+        )
+
+    def list_models_perplexity(self):
+        """
+        Returns a reference to Perplexity's model documentation.
+        """
+        return [
+            "See https://docs.perplexity.ai/getting-started/models",
+        ]
+
+    def list_models_mistral(self):
+        """
+        Retrieves the list of available models from Mistral AI via their OpenAI-compatible API.
+        """
+        return self._list_models_openai_compatible(
+            api_key=self.mistral_api_key,
+            base_url="https://api.mistral.ai/v1"
+        )
+
+    def list_models_deepseek(self):
+        """
+        Retrieves the list of available models from DeepSeek via their OpenAI-compatible API.
+        """
+        return self._list_models_openai_compatible(
+            api_key=self.deepseek_api_key,
+            base_url="https://api.deepseek.com"
+        )
+
+    def list_models_xai(self):
+        """
+        Retrieves the list of available models from xAI (Grok) via their OpenAI-compatible API.
+        """
+        return self._list_models_openai_compatible(
+            api_key=self.xai_api_key,
+            base_url="https://api.x.ai/v1"
+        )
+
+    def list_models_local(self):
+        """
+        Returns a message indicating that listing local models is currently unavailable or not implemented.
+        """
+        return [
+            "Unavailable to list models for local.",
+        ]
+
 
 class Provider(enum.Enum):
     """

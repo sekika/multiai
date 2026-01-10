@@ -63,6 +63,8 @@ def entry():
             help=help_msg)
     parser.add_argument('-m', '--model',
                         help='set model')
+    parser.add_argument('--list',
+                        action='store_true', help='list models')
     parser.add_argument('-t', '--temperature',
                         help=f'set temperature. 0 is deterministic. Default is {client.temperature}.')
     parser.add_argument('-e', '--english',
@@ -84,9 +86,6 @@ def entry():
                             action='store_true', help=f'save log as {log_file}')
     args = parser.parse_args()
 
-    # Get prompt
-    prompt = ' '.join(args.prompt).strip()
-
     # Set ai_provider, ai_providers and model
     client.ai_providers = []
     for provider in Provider:
@@ -100,6 +99,14 @@ def entry():
         if args.model:
             setattr(client, default_model, args.model)
         client.model = getattr(client, default_model, None)
+
+    # List models
+    if args.list:
+        client.list_models()
+        sys.exit()
+
+    # Get prompt
+    prompt = ' '.join(args.prompt).strip()
 
     # -t option
     if args.temperature:
