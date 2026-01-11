@@ -2,6 +2,9 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.4.3 - 2026/1/12
+- New: Released [multiai-tts](https://pypi.org/project/multiai-tts/), an official extension library adding Text-to-Speech capabilities via OpenAI and Google GenAI.
+
 ## 1.4.2 - 2025/12/24
 - Replaced deprecated PyPDF2 with pypdf.
 
