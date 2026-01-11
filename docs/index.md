@@ -22,6 +22,7 @@
   - [Input Options](#input-options)
   - [Output Options](#output-options)
   - [Command-Line Options](#command-line-options)
+- [Text-to-Speech Extension](#text-to-speech-extension)
 - [Using `multiai` as a Python Library](#using-multiai-as-a-python-library)
   - [Sample script to translate a text file](#sample-script-to-translate-a-text-file)
   - [Running your local chat app](#running-your-local-chat-app)
@@ -242,6 +243,37 @@ To see a list of all command-line options, use:
 ```bash
 ai -h
 ```
+
+## Text-to-Speech Extension
+
+You can extend `multiai` with Text-to-Speech capabilities by installing `multiai-tts`.
+
+**Installation**
+
+```bash
+pip install multiai-tts
+```
+*Note: `ffmpeg` is also required for saving audio in formats like MP3.*
+
+**Usage Example**
+
+The extension uses the same API key configuration as `multiai`.
+
+```python
+import multiai_tts
+
+client = multiai_tts.Prompt()
+# Set provider and model
+client.set_tts_model('openai', 'gpt-4o-mini-tts')
+
+# Speak directly
+client.speak("Hello, this is a test.")
+
+# Save to file
+client.save_tts("Saving this audio to mp3.", "output.mp3")
+```
+
+For more details, please refer to the [multiai-tts PyPI page](https://pypi.org/project/multiai-tts/).
 
 ## Using `multiai` as a Python Library
 

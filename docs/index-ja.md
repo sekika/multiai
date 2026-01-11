@@ -22,6 +22,7 @@
   - [入力オプション](#入力オプション)
   - [出力オプション](#出力オプション)
   - [コマンドラインオプション](#コマンドラインオプション)
+- [Text-to-Speech 拡張機能](#text-to-speech-拡張機能)
 - [Pythonライブラリとしての`multiai`の使用](#pythonライブラリとしてのmultiaiの使用)
   - [テキストファイルを翻訳するスクリプト](#テキストファイルを翻訳するスクリプト)
   - [ローカルチャットアプリの実行](#ローカルチャットアプリの実行)
@@ -257,6 +258,37 @@ APIキーは、環境変数として保存できます：
 ```bash
 ai -h
 ```
+
+## Text-to-Speech 拡張機能
+
+`multiai-tts` をインストールすることで、`multiai` にテキスト読み上げ（Text-to-Speech）機能を追加できます。
+
+**インストール**
+
+```bash
+pip install multiai-tts
+```
+*注意: MP3などの形式で音声を保存するには、システムに `ffmpeg` がインストールされている必要があります。*
+
+**使用例**
+
+この拡張機能は `multiai` と同じ API キー設定を使用します。
+
+```python
+import multiai_tts
+
+client = multiai_tts.Prompt()
+# プロバイダとモデルを設定
+client.set_tts_model('openai', 'gpt-4o-mini-tts')
+
+# 直接再生
+client.speak("Hello, this is a test.")
+
+# ファイルに保存
+client.save_tts("Saving this audio to mp3.", "output.mp3")
+```
+
+詳細は [multiai-tts PyPI ページ](https://pypi.org/project/multiai-tts/) を参照してください。
 
 ## Pythonライブラリとしての`multiai`の使用
 
