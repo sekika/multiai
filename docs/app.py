@@ -151,10 +151,16 @@ if uploaded_files:
     st.write("Uploaded:", ", ".join([f.name for f in uploaded_files]))
 
 # Reload chat messages
-if st.session_state.get('chat_messages') is None:
-    st.session_state['chat_messages'] = []
-for message in st.session_state['chat_messages']:
-    st.chat_message(message['role']).write(message['content'])
+for i, message in enumerate(st.session_state['chat_messages']):
+    with st.chat_message(message['role']):
+        st.write(message['content'])
+        if message['role'] == 'assistant':
+            st.button(
+                "📋 Copy",
+                key=f"copy_history_{i}",
+                on_click=btn_copy,
+                args=(message['content'],)
+            )
 
 # Input and reply
 if message := st.chat_input():
