@@ -119,19 +119,22 @@ class Prompt():
         # Azure Text-to-Speech uses Azure Speech Services, which is a separate service
         # from Azure OpenAI. It requires its own dedicated API key and region.
         # The Azure OpenAI API key cannot be used for Speech (TTS/STT), so we load
-        # the Speech-specific key explicitly and keep it independent from LLM providers.
+        # the Speech-specific key explicitly and keep it independent from LLM
+        # providers.
 
         # API key
         env = os.getenv('AZURE_TTS_API_KEY')
         if env is None:
-            self.azure_tts_api_key = inifile.get('api_key', 'azure_tts', fallback=None)
+            self.azure_tts_api_key = inifile.get(
+                'api_key', 'azure_tts', fallback=None)
         else:
             self.azure_tts_api_key = env
 
         # region
         env = os.getenv('AZURE_TTS_REGION')
         if env is None:
-            self.azure_tts_region = inifile.get('azure_tts', 'region', fallback=None)
+            self.azure_tts_region = inifile.get(
+                'azure_tts', 'region', fallback=None)
         else:
             self.azure_tts_region = env
 
@@ -898,7 +901,7 @@ class Prompt():
         Retrieves and prints the list of available models for the currently selected AI provider.
 
         This method dynamically dispatches the call to a specific `list_models_<provider>`
-        function based on the `self.ai_provider` attribute. If the specific function is 
+        function based on the `self.ai_provider` attribute. If the specific function is
         not defined, it prints an error message and exits the program.
         """
         func_name = 'list_models_' + self.ai_provider.name.lower()

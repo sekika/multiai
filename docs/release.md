@@ -2,6 +2,10 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.5.0 - 2026/1/19
+- New: Added `--list` CLI option to list available models
+- New: Added support for loading the Azure Speech API key for use with multiai-tts
+
 ## 1.4.3 - 2026/1/12
 - New: Released [multiai-tts](https://pypi.org/project/multiai-tts/), an official extension library adding Text-to-Speech capabilities via OpenAI and Google GenAI.
 

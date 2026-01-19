@@ -1,6 +1,6 @@
 [project]
 name = "multiai"
-version = "1.4.2"
+version = "1.5.0"
 description = "A Python library for text-based AI interactions with multi-provider support"
 readme = "README.md"
 license = {text = "MIT"}
