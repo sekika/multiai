@@ -261,31 +261,55 @@ ai -h
 
 ## Text-to-Speech 拡張機能
 
-`multiai-tts` をインストールすることで、`multiai` にテキスト読み上げ（Text-to-Speech）機能を追加できます。
+`multiai` は `multiai-tts` をインストールすることで、OpenAI、Google GenAI、Azure Speech を利用したテキスト読み上げ機能を拡張できます。
 
 **インストール**
 
 ```bash
 pip install multiai-tts
+````
+
+*注: WAV 以外の形式（例: MP3）で保存する場合は `ffmpeg` が必要です。*
+
+### API キーの設定
+
+この拡張機能は、`multiai` と同じ API キー設定の仕組みを使用します。OpenAI や Google の API キーについては、メインの設定セクションで説明済みです。Azure TTS では、Azure OpenAI API キーとは別の、Text-to-Speech 専用の Speech API キーが必要です。このキーは Azure ポータルで Speech リソースを作成することで取得できます。リソースのデプロイ後、「Keys and Endpoint」セクションでキーとエンドポイントを確認し、`multiai` の TTS 設定で使用します。
+
+`multiai` 設定ファイルでの設定例:
+
+```ini
+[api_key]
+azure_tts = (Your Azure Speech API key)
+
+[azure_tts]
+region = japaneast
 ```
-*注意: MP3などの形式で音声を保存するには、システムに `ffmpeg` がインストールされている必要があります。*
 
-**使用例**
+環境変数でも設定可能です:
 
-この拡張機能は `multiai` と同じ API キー設定を使用します。
+* `AZURE_TTS_API_KEY` → Azure Speech API キー
+* `AZURE_TTS_REGION` → Speech リソースのリージョン（例: `japaneast`）
+
+### 使用例
 
 ```python
 import multiai_tts
 
 client = multiai_tts.Prompt()
-# プロバイダとモデルを設定
-client.set_tts_model('openai', 'gpt-4o-mini-tts')
+
+# Azure TTS の利用
+client.set_tts_provider('azure')
+client.tts_voice_azure = 'en-US-JennyNeural'
 
 # 直接再生
-client.speak("Hello, this is a test.")
+client.speak("こんにちは、これは Azure TTS のテストです。")
+if client.error:
+    print(client.error_message)
 
-# ファイルに保存
-client.save_tts("Saving this audio to mp3.", "output.mp3")
+# ファイルとして保存
+client.save_tts("この音声を MP3 に保存します。", "output_azure.mp3")
+if client.error:
+    print(client.error_message)
 ```
 
 詳細は [multiai-tts PyPI ページ](https://pypi.org/project/multiai-tts/) を参照してください。

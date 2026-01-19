@@ -246,34 +246,58 @@ ai -h
 
 ## Text-to-Speech Extension
 
-You can extend `multiai` with Text-to-Speech capabilities by installing `multiai-tts`.
+You can extend `multiai` with Text-to-Speech capabilities with OpenAI, Google GenAI, and Azure Speech, by installing `multiai-tts`.
 
 **Installation**
 
 ```bash
 pip install multiai-tts
 ```
-*Note: `ffmpeg` is also required for saving audio in formats like MP3.*
 
-**Usage Example**
+*Note: `ffmpeg` is required if you want to save audio in formats other than WAV (e.g., MP3).*
 
-The extension uses the same API key configuration as `multiai`.
+### API Key Configuration
+
+The extension uses the same API key configuration mechanism as `multiai`. For OpenAI and Google, API keys are already explained in the main configuration section. For Azure TTS, a separate Speech-specific API key is required, which is different from the Azure OpenAI API key and is used only for Text-to-Speech. This key is obtained by creating an Azure Speech resource in the Azure portal. After the resource is deployed, the key and endpoint can be found in the resource’s "Keys and Endpoint" section, and must be configured in `multiai` for TTS to function.
+
+You can configure Azure TTS in your `multiai` settings file:
+
+```ini
+[api_key]
+azure_tts = (Your Azure Speech API key)
+
+[azure_tts]
+region = japaneast
+```
+
+Alternatively, you can set the values via environment variables:
+
+* `AZURE_TTS_API_KEY` → Your Azure Speech API key
+* `AZURE_TTS_REGION` → The Azure region of your Speech resource (e.g., `japaneast`)
+
+### Usage Example
 
 ```python
 import multiai_tts
 
 client = multiai_tts.Prompt()
-# Set provider and model
-client.set_tts_model('openai', 'gpt-4o-mini-tts')
+
+# Azure TTS
+client.set_tts_provider('azure')
+client.tts_voice_azure = 'en-US-JennyNeural'
 
 # Speak directly
-client.speak("Hello, this is a test.")
+client.speak("Hello, this is a test from Azure TTS.")
+if client.error:
+    print(client.error_message)
 
 # Save to file
-client.save_tts("Saving this audio to mp3.", "output.mp3")
+client.save_tts("Saving this audio to mp3.", "output_azure.mp3")
+if client.error:
+    print(client.error_message)
 ```
 
-For more details, please refer to the [multiai-tts PyPI page](https://pypi.org/project/multiai-tts/).
+For more details, see the [multiai-tts PyPI page](https://pypi.org/project/multiai-tts/).
 
 ## Using `multiai` as a Python Library
 
