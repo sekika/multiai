@@ -114,6 +114,27 @@ class Prompt():
                 setattr(self, key, ini)
             else:
                 setattr(self, key, env)
+
+        # --- Azure TTS (not part of Provider) ---
+        # Azure Text-to-Speech uses Azure Speech Services, which is a separate service
+        # from Azure OpenAI. It requires its own dedicated API key and region.
+        # The Azure OpenAI API key cannot be used for Speech (TTS/STT), so we load
+        # the Speech-specific key explicitly and keep it independent from LLM providers.
+
+        # API key
+        env = os.getenv('AZURE_TTS_API_KEY')
+        if env is None:
+            self.azure_tts_api_key = inifile.get('api_key', 'azure_tts', fallback=None)
+        else:
+            self.azure_tts_api_key = env
+
+        # region
+        env = os.getenv('AZURE_TTS_REGION')
+        if env is None:
+            self.azure_tts_region = inifile.get('azure_tts', 'region', fallback=None)
+        else:
+            self.azure_tts_region = env
+
         self.clear()
 
     def set_provider(self, provider):
