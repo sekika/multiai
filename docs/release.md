@@ -2,6 +2,9 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.5.2 - 2026/6/10
+- Added support for Anthropic's Claude Fable model. The temperature parameter is now only available for Sonnet and Haiku models.
+
 ## 1.5.1 - 2026/5/1
 - Not using the temperature parameter for Anthropic's Claude Opus model, due to a specification change introduced in Claude Opus 4.7.
 
