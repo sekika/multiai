@@ -2,6 +2,7 @@
 multiai - A Python library for text-based AI interactions with multi-provider support.
 """
 import anthropic
+from anthropic.types import TextBlock
 import configparser
 import enum
 from google import genai
@@ -608,21 +609,26 @@ class Prompt():
         if not self.prompt_continue:
             self.anthropic_messages += self.message
         try:
-            if 'opus' in self.model_anthropic:
-                self.completion = client.messages.create(
-                    messages=self.anthropic_messages,
-                    model=self.model_anthropic,
-                    max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
-                )
-            else:
+            if 'haiku' in self.model_anthropic or 'sonnet' in self.model_anthropic:
                 self.completion = client.messages.create(
                     messages=self.anthropic_messages,
                     model=self.model_anthropic,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
                 )
+            else:
+                self.completion = client.messages.create(
+                    messages=self.anthropic_messages,
+                    model=self.model_anthropic,
+                    max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
+                )
             self.error = False
-            self.response = self.completion.content[0].text.strip()
+            # self.response = self.completion.content[0].text.strip()
+            self.response = next(
+                block.text for block in self.completion.content
+                if isinstance(block, TextBlock)
+            ).strip()
+
             self.finish_reason = self.completion.stop_reason
             self.anthropic_messages += [{"role": "assistant",
                                          "content": self.response}]
