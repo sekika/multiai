@@ -229,11 +229,8 @@ class Prompt():
             self.response += '\n\nFinished because of max_tokens and max_requests.'
             return self.response
         if verbose:
-            print(
-                f'{
-                    self.color("Repeating...")} max_requests = {
-                    self.max_requests}, requests = {request}\r',
-                end='')
+            msg = f'{self.color("Repeating...")} max_requests={self.max_requests}, requests={request}'
+            print(f'{msg}\r', end='')
         response = self.response
         answer = self.ask('continue', request=request, verbose=verbose)
         if self.error:
@@ -588,12 +585,8 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body
-                self.error_type = f"Error {
-                    self.error_code}: {
-                    self.error_dict['code']}"
-                self.error_message = f"{
-                    self.error_type}\n{
-                    self.error_dict['message']}"
+                self.error_type = f"Error {self.error_code}: {self.error_dict['code']}"
+                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -606,6 +599,8 @@ class Prompt():
             self.error_message = 'API key for Anthropic is not set.'
             return
         client = anthropic.Anthropic(api_key=self.anthropic_api_key)
+        if self.anthropic_messages and self.anthropic_messages[-1]['role'] == 'assistant':
+            self.anthropic_messages.pop()
         if not self.prompt_continue:
             self.anthropic_messages += self.message
         try:
@@ -637,12 +632,8 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body['error']
-                self.error_type = f"{
-                    self.error_code}: {
-                    self.error_dict['type']}"
-                self.error_message = f"{
-                    self.error_type}\n{
-                    self.error_dict['message']}"
+                self.error_type = f"{self.error_code}: {self.error_dict['type']}"
+                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -801,12 +792,8 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = e.body
-                self.error_type = f"Error {
-                    self.error_code}: {
-                    self.error_dict['code']}"
-                self.error_message = f"{
-                    self.error_type}\n{
-                    self.error_dict['message']}"
+                self.error_type = f"Error {self.error_code}: {self.error_dict['code']}"
+                self.error_message = f"{self.error_type}\n{self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -838,9 +825,7 @@ class Prompt():
             try:
                 self.error_code = e.status_code
                 self.error_dict = json.loads(e.body)
-                self.error_message = f"Error {
-                    self.error_code}: {
-                    self.error_dict['message']}"
+                self.error_message = f"Error {self.error_code}: {self.error_dict['message']}"
             except Exception:
                 self.error_message = e
 
@@ -904,8 +889,7 @@ class Prompt():
                 self.error_code = e.status_code
                 self.error_message = e.error
                 if self.error_code == 404:
-                    self.error_message += f'\nRun "ollama pull {
-                        self.model}" and try again.'
+                    self.error_message += f'\nRun "ollama pull {self.model}" and try again.'
             except Exception:
                 self.error_message = e
 

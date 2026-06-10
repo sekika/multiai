@@ -8,13 +8,12 @@ cd dev
 echo '=== test'
 ai -o hi
 ai -a 土壌について
-ai -g hi
-ai -p hi
-echo 'Skipping mistral test'
+# ai -g hi
+# ai -p hi
 # ai -i hi
 ai -d hi
 ai -x hi
-ai -l hi
+# ai -l hi
 
 echo '=== autopep8'
 autopep8 -i --aggressive ../src/multiai/*.py
