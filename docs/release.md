@@ -2,6 +2,17 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.6.0 - 2026/6/16
+- New: Added response attachment support. When a provider API returns actual file-like data in an AI response, `multiai` can now receive it, expose it through the Python API, and save it from the CLI.
+  - Added the `ResponseAttachment` data structure.
+  - Added `client.response_attachments` to access attachments returned by the latest response.
+  - Added `client.save_attachment(attachment, filename)` to explicitly save a response attachment when using `multiai` as a Python library.
+  - Added automatic saving of actual response attachments in the CLI.
+  - Added `[response_attachment] directory` setting to configure the save directory. If not set, `./multiai_attachments` is used.
+  - Added `--response-attachment-dir DIR` CLI option to override the response attachment save directory.
+  - If a response attachment is returned as a URL, `multiai` displays the URL but does not download it.
+- Note: In the current chat-based API usage, most providers usually return text only, so response attachments are uncommon. This feature is mainly a foundation for future support of APIs and tools that can return actual files, such as image generation, code interpreter outputs, Gemini inline data, or OpenAI Responses API file outputs.
+
 ## 1.5.2 - 2026/6/10
 - Added support for Anthropic's Claude Fable model. The temperature parameter is now only available for Sonnet and Haiku models.
 
