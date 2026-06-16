@@ -4,7 +4,8 @@ Entry point for multiai CLI with file attachment support.
 Usage examples:
   ai "Explain this" -f doc1.pdf notes.md --attach-limit 50000
   ai -u https://example.com/article.html -f table.csv
-  ai -e -f report.docx  # English helper + attachments
+  ai -e -f report.docx
+  ai "Create a chart as an image" --response-attachment-dir ./out
 """
 import argparse
 import configparser
@@ -72,11 +73,15 @@ def entry():
     parser.add_argument('-u', '--url',
                         help='retrieve text from the URL')
 
-    # From version 1.4.0: file attachment option (replaces old -f/--factual)
+    # File attachment option
     parser.add_argument('-f', '--file', nargs='+', action='append',
                         help='attach one or more files (txt, md, pdf, docx, html/htm, csv)')
     parser.add_argument('--attach-limit', type=int, default=client.attach_char_limit,
                         help=f'character limit per attachment before auto-summarization (default {client.attach_char_limit})')
+
+    # Response attachment option
+    parser.add_argument('--response-attachment-dir',
+                        help='directory to save response attachments')
 
     if not client.always_copy:
         parser.add_argument('-c', '--copy',
@@ -85,6 +90,11 @@ def entry():
         parser.add_argument('-s', '--save',
                             action='store_true', help=f'save log as {log_file}')
     args = parser.parse_args()
+
+    # Override response attachment directory
+    if args.response_attachment_dir:
+        client.response_attachment_dir = os.path.expanduser(
+            args.response_attachment_dir)
 
     # Set ai_provider, ai_providers and model
     client.ai_providers = []
@@ -197,7 +207,7 @@ def entry():
     # Finished loading arguments and run
     # Enter interactive mode if:
     # - no prompt was provided originally, or
-    # - URL was used (keeps old behavior), or
+    # - URL was used, or
     # - we already did a one-shot with attachments above.
     if original_prompt_empty or args.url or did_one_shot_with_attachments:
         client.interactive(pre_prompt=pre_prompt)

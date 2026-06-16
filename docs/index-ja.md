@@ -27,6 +27,7 @@
   - [テキストファイルを翻訳するスクリプト](#テキストファイルを翻訳するスクリプト)
   - [ローカルチャットアプリの実行](#ローカルチャットアプリの実行)
   - [Google Colabでの実行](#google-colabでの実行)
+- [レスポンス添付ファイル対応](#レスポンス添付ファイル対応)
 
 ## 対応しているAIプロバイダーとモデル
 
@@ -394,3 +395,38 @@ streamlit run app.py
 ### Google Colabでの実行
 
 Google Colab で実行するには、[このノートブック](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb)を使用して下さい。Colab Secrets に API キーを設定する必要があります。
+
+## レスポンス添付ファイル対応
+
+`multiai` には、AI のレスポンスに含まれる添付ファイルを扱うための基本機能があります。ただし、この機能は現時点では主に将来の拡張のための基盤です。
+
+現在の実装では、多くのプロバイダに対して通常のチャット形式の API を使用しています。これらの API は通常、テキストのみを返します。たとえば、モデルに CSV、SVG、PDF、画像ファイルなどの作成を依頼しても、多くの場合、実際の添付ファイルではなく、ファイル内容のテキスト、ソースコード、Markdown、または手順説明として返されます。その場合、レスポンス添付ファイルは生成されません。
+
+レスポンス添付ファイルが使われるのは、プロバイダの API が実際に inline binary data、ファイルメタデータ、file ID、生成ファイル URL などのファイル相当のデータを返した場合のみです。これは現在の通常チャット API の利用ではあまり発生しませんが、将来的に画像生成 API、ツールが生成したファイル、code interpreter の出力、Gemini の inline data、OpenAI Responses API のファイル出力などに対応する際に有用になります。
+
+コマンドラインインターフェイスでは、実際にレスポンス添付ファイルが返された場合、`multiai` はそれを自動的に保存し、保存先のパスを表示します。保存先ディレクトリは `[response_attachment]` セクションで設定します。
+
+```ini
+[response_attachment]
+directory = ./multiai_attachments
+```
+
+このセクションが設定されていない場合は、`./multiai_attachments` が使われます。保存先ディレクトリは、以下のようにコマンドラインから上書きできます。
+
+```bash
+ai "prompt" --response-attachment-dir ./out
+```
+
+レスポンス添付ファイルが URL として返された場合、`multiai` はその URL を表示しますが、ダウンロードはしません。
+
+Python ライブラリとして使用する場合、添付ファイルは自動保存されません。添付ファイルは `client.response_attachments` から取得し、必要な場合のみ明示的に保存します。
+
+```python
+answer = client.ask("Create a file.")
+attachments = client.response_attachments
+
+if attachments:
+    client.save_attachment(attachments[0], "output.bin")
+```
+
+通常のテキストベースのチャット利用では、この機能が使われることはほとんどありません。この機能の目的は、将来的に実際のファイルを返すプロバイダ API やツールベースのワークフローへ対応するための準備です。

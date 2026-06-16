@@ -3,13 +3,18 @@ multiai - A Python library for text-based AI interactions with multi-provider su
 """
 import anthropic
 from anthropic.types import TextBlock
+import base64
 import configparser
+from dataclasses import dataclass, field
+from datetime import datetime
 import enum
 from google import genai
 import json
+import mimetypes
 import ollama
 import openai
 import os
+import re
 import mistralai
 import pypdf
 import pyperclip
@@ -18,6 +23,7 @@ import sys
 import trafilatura
 from io import BytesIO
 from importlib.metadata import distribution, PackageNotFoundError
+from typing import Any, Dict, List, Optional
 from .printlong import print_long
 import docx  # python-docx
 from docx import Document
@@ -26,7 +32,32 @@ __all__ = [
     "Prompt",
     "Provider",
     "ColorCode",
+    "ResponseAttachment",
 ]
+
+
+@dataclass
+class ResponseAttachment:
+    """
+    Attachment returned by an AI response.
+    """
+    id: Optional[str] = None
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    name: Optional[str] = None
+    mime_type: Optional[str] = None
+    extension: Optional[str] = None
+    size: Optional[int] = None
+    data: Optional[bytes] = None
+    text: Optional[str] = None
+    url: Optional[str] = None
+    file_id: Optional[str] = None
+    source_type: str = "unknown"
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    saved_path: Optional[str] = None
+    created_at: str = field(
+        default_factory=lambda: datetime.now().isoformat(
+            timespec="seconds"))
 
 
 class Prompt():
@@ -50,8 +81,8 @@ class Prompt():
             dist = distribution('multiai')
             self.version = dist.version
             md = dist.metadata  # email.message.Message
-            self.description = (md.get('Summary') or '').strip()
             # Project-URL: Homepage, https://... or Home-page
+            self.description = (md.get('Summary') or '').strip()
             self.url = None
             for item in md.get_all('Project-URL') or []:
                 label, _, link = item.partition(', ')
@@ -105,6 +136,15 @@ class Prompt():
         # From version 1.4.0: attachment character limit (per attachment)
         self.attach_char_limit = inifile.getint(
             'default', 'attach_char_limit', fallback=40000)
+
+        # Response attachment directory
+        self.response_attachment_dir = os.path.expanduser(
+            inifile.get(
+                'response_attachment',
+                'directory',
+                fallback='./multiai_attachments'
+            )
+        )
 
         for provider in Provider:
             env = os.getenv(provider.name + '_API_KEY')
@@ -179,6 +219,7 @@ class Prompt():
         self.mistral_messages = []
         self.xai_messages = []
         self.local_messages = []
+        self.response_attachments = []
 
     def ask(self, prompt, request=1, verbose=False):
         """
@@ -193,6 +234,8 @@ class Prompt():
         :return: str
             Answer from AI
         """
+        if request == 1:
+            self.response_attachments = []
         self.message = [
             {
                 "role": self.role,
@@ -304,8 +347,14 @@ class Prompt():
             Prompt shortened for logging
         """
         print(f'{self.color("Please wait ......")}\r', end='')
+        saved_paths = []
+        attachment_urls = []
+        failed_attachments = []
         if len(self.ai_providers) == 1:
             answer = self.ask(prompt, verbose=True)
+            attachments = list(self.response_attachments)
+            saved_paths, attachment_urls, failed_attachments = \
+                self._save_response_attachments_for_cli(attachments)
             print(' ' * 50 + '\r', end='')
             if self.error:
                 print(f'{self.color("Error message")}> {answer}')
@@ -318,6 +367,8 @@ class Prompt():
                     with open(self.log_file, mode='a') as f:
                         f.write(
                             f'### {self.role}:\n{prompt}\n### {self.model}:\n{answer}\n')
+                        f.write(self._response_attachment_log(
+                            saved_paths, attachment_urls, failed_attachments))
                 except Exception as e:
                     print(e)
                     print('Check the setting of log_file.')
@@ -331,6 +382,12 @@ class Prompt():
             for provider in (self.ai_providers):
                 self.ai_provider = provider
                 single_answer = self.ask(prompt, verbose=True)
+                attachments = list(self.response_attachments)
+                s, u, f = self._save_response_attachments_for_cli(
+                    attachments, provider=provider.name.lower())
+                saved_paths += s
+                attachment_urls += u
+                failed_attachments += f
                 model = getattr(self, 'model_' + provider.name.lower(), None)
                 if self.error:
                     print(
@@ -342,8 +399,12 @@ class Prompt():
                 with open(self.log_file, mode='a') as f:
                     f.write(
                         f'### {self.role}:\n{prompt_log}\n{answer}\n')
+                    f.write(self._response_attachment_log(
+                        saved_paths, attachment_urls, failed_attachments))
         print(' ' * 50 + '\r', end='')
         print_long(answer)
+        self._print_response_attachment_summary(
+            saved_paths, attachment_urls, failed_attachments)
         if self.copy:
             pyperclip.copy(answer)
 
@@ -546,6 +607,431 @@ class Prompt():
 
         return text
 
+    def save_attachment(self, attachment, filename=None):
+        """
+        Save a response attachment.
+
+        :param attachment: ResponseAttachment
+            Attachment to save
+        :param filename: str
+            Output file name or path
+        :return: str
+            Saved file path
+        """
+        if isinstance(attachment, dict):
+            attachment = ResponseAttachment(**attachment)
+        if not isinstance(attachment, ResponseAttachment):
+            raise TypeError('attachment should be ResponseAttachment.')
+        if attachment.data is None and attachment.text is None:
+            if attachment.url:
+                raise ValueError('URL attachments are not downloaded.')
+            raise ValueError('Attachment has no data to save.')
+
+        if filename is None:
+            filename = self._attachment_default_filename(attachment, 1)
+
+        filename = os.path.expanduser(filename)
+        dirname = os.path.dirname(filename)
+        basename = self._sanitize_filename(os.path.basename(filename))
+        if dirname:
+            path = os.path.join(dirname, basename)
+        else:
+            path = os.path.join(self.response_attachment_dir, basename)
+
+        directory = os.path.dirname(path) or '.'
+        os.makedirs(directory, exist_ok=True)
+        path = self._unique_path(path)
+
+        if attachment.data is not None:
+            with open(path, 'wb') as f:
+                f.write(attachment.data)
+        else:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(attachment.text)
+
+        attachment.saved_path = path
+        return path
+
+    def save_response_attachments(self, attachments=None):
+        """
+        Save response attachments with generated file names.
+
+        :param attachments: list[ResponseAttachment]
+            Attachments to save
+        :return: list[str]
+            Saved file paths
+        """
+        saved_paths, _, _ = self._save_response_attachments_for_cli(
+            self.response_attachments if attachments is None else attachments)
+        return saved_paths
+
+    def _get_value(self, obj, key, default=None):
+        """
+        Get a value from dict or object.
+        """
+        if obj is None:
+            return default
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
+
+    def _decode_attachment_data(self, data):
+        """
+        Decode inline attachment data.
+        """
+        if data is None:
+            return None
+        if isinstance(data, bytes):
+            return data
+        if isinstance(data, bytearray):
+            return bytes(data)
+        if isinstance(data, str):
+            if data.startswith('data:'):
+                m = re.match(r'^data:([^;]+);base64,(.*)$', data, re.S)
+                if m:
+                    data = m.group(2)
+            try:
+                return base64.b64decode(data)
+            except Exception:
+                return data.encode('utf-8')
+        return None
+
+    def _extension_from_mime_type(self, mime_type):
+        """
+        Guess an extension from MIME type.
+        """
+        if not mime_type:
+            return '.bin'
+        table = {
+            'image/png': '.png',
+            'image/jpeg': '.jpg',
+            'image/jpg': '.jpg',
+            'image/webp': '.webp',
+            'application/pdf': '.pdf',
+            'text/csv': '.csv',
+            'text/plain': '.txt',
+            'application/json': '.json',
+            'text/html': '.html',
+        }
+        if mime_type in table:
+            return table[mime_type]
+        ext = mimetypes.guess_extension(mime_type)
+        return ext or '.bin'
+
+    def _sanitize_filename(self, filename):
+        """
+        Sanitize a file name.
+        """
+        filename = os.path.basename(filename or '')
+        filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', filename)
+        filename = filename.strip().strip('.')
+        return filename or 'attachment.bin'
+
+    def _unique_path(self, path):
+        """
+        Return a non-existing path.
+        """
+        if not os.path.exists(path):
+            return path
+        root, ext = os.path.splitext(path)
+        n = 1
+        while True:
+            candidate = f'{root}-{n}{ext}'
+            if not os.path.exists(candidate):
+                return candidate
+            n += 1
+
+    def _attachment_default_filename(
+            self, attachment, index=1, timestamp=None, provider=None):
+        """
+        Generate a default attachment file name.
+        """
+        if timestamp is None:
+            timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+        name = attachment.name
+        if not name:
+            ext = attachment.extension or self._extension_from_mime_type(
+                attachment.mime_type)
+            name = f'attachment-{index}{ext}'
+        name = self._sanitize_filename(name)
+        if provider:
+            return f'{timestamp}-{provider}-{name}'
+        return f'{timestamp}-{name}'
+
+    def _add_response_attachment(
+            self, provider=None, name=None, mime_type=None, data=None,
+            text=None, url=None, file_id=None, source_type='unknown',
+            metadata=None):
+        """
+        Add a response attachment.
+        """
+        binary = self._decode_attachment_data(data)
+        extension = self._extension_from_mime_type(mime_type)
+        size = None
+        if binary is not None:
+            size = len(binary)
+        elif text is not None:
+            size = len(text.encode('utf-8'))
+        attachment = ResponseAttachment(
+            id=file_id or url,
+            provider=provider,
+            model=getattr(
+                self,
+                'model_' + provider,
+                None) if provider else getattr(
+                self,
+                'model',
+                None),
+            name=name,
+            mime_type=mime_type,
+            extension=extension,
+            size=size,
+            data=binary,
+            text=text,
+            url=url,
+            file_id=file_id,
+            source_type=source_type,
+            metadata=metadata or {},
+        )
+        self.response_attachments.append(attachment)
+        return attachment
+
+    def _extract_common_parts(self, parts, provider):
+        """
+        Extract text and attachments from content parts.
+        """
+        text_chunks = []
+        for part in parts or []:
+            text = self._get_value(part, 'text')
+            if text:
+                text_chunks.append(str(text))
+
+            inline_data = self._get_value(part, 'inline_data')
+            if inline_data is None:
+                inline_data = self._get_value(part, 'inlineData')
+            if inline_data is not None:
+                mime_type = self._get_value(inline_data, 'mime_type')
+                if mime_type is None:
+                    mime_type = self._get_value(inline_data, 'mimeType')
+                data = self._get_value(inline_data, 'data')
+                name = self._get_value(inline_data, 'name')
+                self._add_response_attachment(
+                    provider=provider,
+                    name=name,
+                    mime_type=mime_type,
+                    data=data,
+                    source_type='inline',
+                    metadata={'part': str(type(part))}
+                )
+
+            file_data = self._get_value(part, 'file_data')
+            if file_data is None:
+                file_data = self._get_value(part, 'fileData')
+            if file_data is not None:
+                mime_type = self._get_value(file_data, 'mime_type')
+                if mime_type is None:
+                    mime_type = self._get_value(file_data, 'mimeType')
+                url = self._get_value(file_data, 'file_uri')
+                if url is None:
+                    url = self._get_value(file_data, 'fileUri')
+                if url is None:
+                    url = self._get_value(file_data, 'uri')
+                name = self._get_value(file_data, 'name')
+                file_id = self._get_value(file_data, 'file_id')
+                if file_id is None:
+                    file_id = self._get_value(file_data, 'fileId')
+                self._add_response_attachment(
+                    provider=provider,
+                    name=name,
+                    mime_type=mime_type,
+                    url=url,
+                    file_id=file_id,
+                    source_type='url' if url else 'file_id',
+                    metadata={'part': str(type(part))}
+                )
+
+            image_url = self._get_value(part, 'image_url')
+            if image_url is not None:
+                url = self._get_value(image_url, 'url')
+                name = self._get_value(image_url, 'name')
+                if isinstance(url, str) and url.startswith('data:'):
+                    mime_type = None
+                    m = re.match(r'^data:([^;]+);base64,', url, re.S)
+                    if m:
+                        mime_type = m.group(1)
+                    self._add_response_attachment(
+                        provider=provider,
+                        name=name,
+                        mime_type=mime_type,
+                        data=url,
+                        source_type='inline',
+                        metadata={'part': str(type(part))}
+                    )
+                elif url:
+                    self._add_response_attachment(
+                        provider=provider,
+                        name=name,
+                        mime_type=self._get_value(image_url, 'mime_type'),
+                        url=url,
+                        source_type='url',
+                        metadata={'part': str(type(part))}
+                    )
+
+            url = self._get_value(part, 'url')
+            if url and not text:
+                self._add_response_attachment(
+                    provider=provider,
+                    name=self._get_value(part, 'name'),
+                    mime_type=self._get_value(part, 'mime_type'),
+                    url=url,
+                    source_type='url',
+                    metadata={'part': str(type(part))}
+                )
+
+        return ''.join(text_chunks)
+
+    def _extract_message_text_and_attachments(self, message, provider):
+        """
+        Extract text and attachments from a chat message.
+        """
+        content = self._get_value(message, 'content')
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            text = self._extract_common_parts(content, provider)
+        else:
+            text = '' if content is None else str(content)
+
+        audio = self._get_value(message, 'audio')
+        if audio is not None:
+            data = self._get_value(audio, 'data')
+            url = self._get_value(audio, 'url')
+            file_id = self._get_value(audio, 'id')
+            self._add_response_attachment(
+                provider=provider,
+                name=self._get_value(audio, 'name'),
+                mime_type=self._get_value(audio, 'mime_type') or 'audio/mpeg',
+                data=data,
+                url=url,
+                file_id=file_id,
+                source_type='inline' if data else (
+                    'url' if url else 'file_id'),
+                metadata={'message_field': 'audio'}
+            )
+
+        annotations = self._get_value(message, 'annotations')
+        for ann in annotations or []:
+            file_path = self._get_value(ann, 'file_path')
+            if file_path is not None:
+                file_id = self._get_value(file_path, 'file_id')
+                self._add_response_attachment(
+                    provider=provider,
+                    name=self._get_value(file_path, 'filename'),
+                    file_id=file_id,
+                    source_type='file_id',
+                    metadata={'annotation': str(type(ann))}
+                )
+
+        return text
+
+    def _extract_anthropic_text_and_attachments(self, content):
+        """
+        Extract text and attachments from Anthropic content blocks.
+        """
+        text_chunks = []
+        for block in content or []:
+            if isinstance(block, TextBlock):
+                text_chunks.append(block.text)
+                continue
+
+            text = self._get_value(block, 'text')
+            if text:
+                text_chunks.append(str(text))
+
+            source = self._get_value(block, 'source')
+            if source is not None:
+                data = self._get_value(source, 'data')
+                mime_type = self._get_value(source, 'media_type')
+                if mime_type is None:
+                    mime_type = self._get_value(source, 'mime_type')
+                url = self._get_value(source, 'url')
+                self._add_response_attachment(
+                    provider='anthropic',
+                    name=self._get_value(block, 'name'),
+                    mime_type=mime_type,
+                    data=data,
+                    url=url,
+                    source_type='inline' if data else (
+                        'url' if url else 'unknown'),
+                    metadata={'block': str(type(block))}
+                )
+
+            file_id = self._get_value(block, 'file_id')
+            if file_id:
+                self._add_response_attachment(
+                    provider='anthropic',
+                    name=self._get_value(block, 'name'),
+                    file_id=file_id,
+                    source_type='file_id',
+                    metadata={'block': str(type(block))}
+                )
+
+        return ''.join(text_chunks)
+
+    def _save_response_attachments_for_cli(self, attachments, provider=None):
+        """
+        Save response attachments for command output.
+        """
+        saved_paths = []
+        urls = []
+        failed = []
+        timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+        for i, attachment in enumerate(attachments or [], start=1):
+            if attachment.url and attachment.data is None and attachment.text is None:
+                urls.append(attachment.url)
+                continue
+            try:
+                filename = self._attachment_default_filename(
+                    attachment, i, timestamp=timestamp, provider=provider)
+                saved_paths.append(self.save_attachment(attachment, filename))
+            except Exception as e:
+                failed.append((attachment, e))
+        return saved_paths, urls, failed
+
+    def _print_response_attachment_summary(self, saved_paths, urls, failed):
+        """
+        Print response attachment summary.
+        """
+        if saved_paths:
+            print('\nResponse attachments saved:')
+            for path in saved_paths:
+                print(f'- {path}')
+        if urls:
+            print('\nResponse attachment URLs:')
+            for url in urls:
+                print(f'- {url}')
+        if failed:
+            print('\nResponse attachments not saved:')
+            for attachment, error in failed:
+                name = attachment.name or attachment.file_id or 'attachment'
+                print(f'- {name}: {error}')
+
+    def _response_attachment_log(self, saved_paths, urls, failed):
+        """
+        Return response attachment log text.
+        """
+        if not saved_paths and not urls and not failed:
+            return ''
+        lines = ['### response attachments:']
+        for path in saved_paths:
+            lines.append(f'- saved: {path}')
+        for url in urls:
+            lines.append(f'- url: {url}')
+        for attachment, error in failed:
+            name = attachment.name or attachment.file_id or 'attachment'
+            lines.append(f'- not saved: {name}: {error}')
+        return '\n' + '\n'.join(lines) + '\n'
+
     # Implementations for each providers
     def ask_openai(self):
         """
@@ -575,8 +1061,9 @@ class Prompt():
                     max_tokens=self.max_tokens
                 )
             self.error = False
-            self.response = self.completion.choices[0].message.content.strip(
-            )
+            message = self.completion.choices[0].message
+            self.response = self._extract_message_text_and_attachments(
+                message, 'openai').strip()
             self.finish_reason = self.completion.choices[0].finish_reason
             self.openai_messages += [{"role": "assistant",
                                       "content": self.response}]
@@ -618,12 +1105,8 @@ class Prompt():
                     max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
                 )
             self.error = False
-            # self.response = self.completion.content[0].text.strip()
-            self.response = next(
-                block.text for block in self.completion.content
-                if isinstance(block, TextBlock)
-            ).strip()
-
+            self.response = self._extract_anthropic_text_and_attachments(
+                self.completion.content).strip()
             self.finish_reason = self.completion.stop_reason
             self.anthropic_messages += [{"role": "assistant",
                                          "content": self.response}]
@@ -678,7 +1161,7 @@ class Prompt():
         if self.temperature is not None:
             config["temperature"] = float(self.temperature)
         if self.max_tokens is not None:
-            # google.genai は max_output_tokens
+            # google.genai uses max_output_tokens
             config["max_output_tokens"] = int(self.max_tokens)
 
         try:
@@ -688,15 +1171,17 @@ class Prompt():
                 config=config if config else None,
             )
             self.error = False
-            text = getattr(resp, "text", None)
+
+            text = ""
+            try:
+                cand0 = resp.candidates[0]
+                parts = cand0.content.parts
+                text = self._extract_common_parts(parts, 'google')
+            except Exception:
+                pass
+
             if not text:
-                text = ""
-                try:
-                    cand0 = resp.candidates[0]
-                    parts = cand0.content.parts
-                    text = "".join(getattr(p, "text", "") for p in parts)
-                except Exception:
-                    pass
+                text = getattr(resp, "text", None) or ""
 
             self.response = (text or "").replace('• ', '* ').strip()
 
@@ -743,8 +1228,9 @@ class Prompt():
                 max_tokens=self.max_tokens
             )
             self.error = False
-            self.response = self.completion.choices[0].message.content.strip(
-            )
+            message = self.completion.choices[0].message
+            self.response = self._extract_message_text_and_attachments(
+                message, 'perplexity').strip()
             self.finish_reason = self.completion.choices[0].finish_reason
             self.perplexity_messages += [{"role": "assistant",
                                           "content": self.response}]
@@ -779,8 +1265,9 @@ class Prompt():
                 stream=False
             )
             self.error = False
-            self.response = self.completion.choices[0].message.content.strip(
-            )
+            message = self.completion.choices[0].message
+            self.response = self._extract_message_text_and_attachments(
+                message, 'deepseek').strip()
             self.finish_reason = self.completion.choices[0].finish_reason
             self.deepseek_messages += [{"role": "assistant",
                                         "content": self.response}]
@@ -815,8 +1302,9 @@ class Prompt():
                 max_tokens=self.max_tokens
             )
             self.error = False
-            self.response = self.completion.choices[0].message.content.strip(
-            )
+            message = self.completion.choices[0].message
+            self.response = self._extract_message_text_and_attachments(
+                message, 'mistral').strip()
             self.finish_reason = self.completion.choices[0].finish_reason
             self.mistral_messages += [{"role": "assistant",
                                        "content": self.response}]
@@ -850,8 +1338,9 @@ class Prompt():
                 max_tokens=self.max_tokens
             )
             self.error = False
-            self.response = self.completion.choices[0].message.content.strip(
-            )
+            message = self.completion.choices[0].message
+            self.response = self._extract_message_text_and_attachments(
+                message, 'xai').strip()
             self.finish_reason = self.completion.choices[0].finish_reason
             self.xai_messages += [{"role": "assistant",
                                    "content": self.response}]

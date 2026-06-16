@@ -27,6 +27,7 @@
   - [Sample script to translate a text file](#sample-script-to-translate-a-text-file)
   - [Running your local chat app](#running-your-local-chat-app)
   - [Running on Google Colab](#running-on-google-colab)
+- [Response Attachment Support](#response-attachment-support)
 
 ## Supported AI Providers and Models
 
@@ -382,3 +383,38 @@ Once the server is running, your default web browser will open and display the c
 ### Running on Google Colab
 
 To run on Google Colab, use [this notebook](https://colab.research.google.com/github/sekika/multiai/blob/main/docs/multiai.ipynb). You will need to set API keys in your Colab Secrets.
+
+## Response Attachment Support
+
+`multiai` includes basic support for response attachments, but this feature is currently intended mainly as a foundation for future extensions.
+
+In the current implementation, `multiai` uses ordinary chat-style APIs for most providers. These APIs usually return text only. For example, if you ask a model to create a CSV, SVG, PDF, or image file, the model will typically return the file content as text, source code, Markdown, or instructions, rather than an actual attached file. In such cases, no response attachment is produced.
+
+Response attachments are only used when the provider API actually returns file-like data, such as inline binary data, file metadata, a file ID, or a generated file URL. This is uncommon with the current chat API usage, but it may become useful for future support of features such as image generation APIs, tool-generated files, code interpreter outputs, Gemini inline data, or OpenAI Responses API file outputs.
+
+When using the command-line interface, if an actual response attachment is returned, `multiai` saves it automatically and shows the saved path. The save directory is configured in the `[response_attachment]` section:
+
+```ini
+[response_attachment]
+directory = ./multiai_attachments
+```
+
+If this section is not set, `./multiai_attachments` is used. The directory can also be overridden with:
+
+```bash
+ai "prompt" --response-attachment-dir ./out
+```
+
+If a response attachment is returned as a URL, `multiai` displays the URL but does not download it.
+
+When using `multiai` as a Python library, attachments are not saved automatically. They can be accessed from `client.response_attachments` and saved explicitly:
+
+```python
+answer = client.ask("Create a file.")
+attachments = client.response_attachments
+
+if attachments:
+    client.save_attachment(attachments[0], "output.bin")
+```
+
+For typical text-based chat usage, this feature will usually remain unused. Its purpose is to prepare `multiai` for future provider APIs and tool-based workflows that can return actual files.
