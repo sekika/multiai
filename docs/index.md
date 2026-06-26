@@ -298,7 +298,7 @@ if client.error:
     print(client.error_message)
 ```
 
-For more details, see the [multiai-tts PyPI page](https://pypi.org/project/multiai-tts/).
+For more details, see the [multiai-tts documentation](https://sekika.github.io/multiai-tts/).
 
 ## Using `multiai` as a Python Library
 

@@ -313,7 +313,7 @@ if client.error:
     print(client.error_message)
 ```
 
-詳細は [multiai-tts PyPI ページ](https://pypi.org/project/multiai-tts/) を参照してください。
+詳細は [multiai-tts ドキュメント](https://sekika.github.io/multiai-tts/) を参照してください。
 
 ## Pythonライブラリとしての`multiai`の使用
 
