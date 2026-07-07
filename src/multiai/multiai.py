@@ -941,7 +941,8 @@ class Prompt():
         text_chunks = []
         for block in content or []:
             if isinstance(block, TextBlock):
-                text_chunks.append(block.text)
+                if block.text is not None:
+                    text_chunks.append(block.text)
                 continue
 
             text = self._get_value(block, 'text')
@@ -1091,19 +1092,24 @@ class Prompt():
         if not self.prompt_continue:
             self.anthropic_messages += self.message
         try:
+            # Stream internally to avoid the SDK's default 10-minute timeout on
+            # long-running (e.g. reasoning) requests, then take the final
+            # message and return the complete text as before.
             if 'haiku' in self.model_anthropic or 'sonnet' in self.model_anthropic:
-                self.completion = client.messages.create(
+                stream_ctx = client.messages.stream(
                     messages=self.anthropic_messages,
                     model=self.model_anthropic,
                     temperature=self.temperature,
                     max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
                 )
             else:
-                self.completion = client.messages.create(
+                stream_ctx = client.messages.stream(
                     messages=self.anthropic_messages,
                     model=self.model_anthropic,
                     max_tokens=self.max_tokens if self.max_tokens else self.max_tokens_anthropic
                 )
+            with stream_ctx as stream:
+                self.completion = stream.get_final_message()
             self.error = False
             self.response = self._extract_anthropic_text_and_attachments(
                 self.completion.content).strip()
