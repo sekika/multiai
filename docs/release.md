@@ -2,6 +2,10 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.6.1 - 2026/7/7
+- Fix: Anthropic requests now stream internally, avoiding the SDK's default 10-minute timeout on long-running (e.g. reasoning) responses. The complete response text is still returned as before.
+- Fix: Prevent a crash when an Anthropic response contains a text block whose text is `None` (`TypeError`/`AttributeError` when building the response).
+
 ## 1.6.0 - 2026/6/16
 - New: Added response attachment support. When a provider API returns actual file-like data in an AI response, `multiai` can now receive it, expose it through the Python API, and save it from the CLI.
   - Added the `ResponseAttachment` data structure.
