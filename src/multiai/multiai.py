@@ -207,6 +207,19 @@ class Prompt():
         self.model = model
         setattr(self, 'model_' + provider.lower(), model)
 
+    @staticmethod
+    def _openai_supports_temperature(model):
+        """Return whether an OpenAI chat model supports ``temperature``.
+
+        GPT-5 and newer GPT models, plus the o-series reasoning models, do not
+        accept a caller-supplied temperature. Keep older GPT models compatible
+        while treating future GPT generations conservatively.
+        """
+        if model.startswith('o'):
+            return False
+        match = re.match(r'^gpt-(\d+)', model)
+        return not (match and int(match.group(1)) >= 5)
+
     def clear(self):
         """
         Clear chat history.
@@ -1046,21 +1059,18 @@ class Prompt():
         if not self.prompt_continue:
             self.openai_messages += self.message
         try:
-            if self.model[:5] == 'gpt-5' or self.model[0] == 'o':
-                # gpt-5, o1 and o3 series do not support variable temperature and
-                # max_tokens is written as max_completion_tokens
-                self.completion = openai.chat.completions.create(
-                    messages=self.openai_messages,
-                    model=self.model_openai,
-                    max_completion_tokens=self.max_tokens
-                )
-            else:
-                self.completion = openai.chat.completions.create(
-                    messages=self.openai_messages,
-                    model=self.model_openai,
-                    temperature=self.temperature,
-                    max_tokens=self.max_tokens
-                )
+            params = {
+                'messages': self.openai_messages,
+                'model': self.model_openai,
+            }
+            # ``max_tokens`` is deprecated for recent OpenAI models and is not
+            # accepted by reasoning models. Do not send either limit parameter
+            # when it is unset: the API expects an integer, not null.
+            if self.max_tokens is not None:
+                params['max_completion_tokens'] = self.max_tokens
+            if self._openai_supports_temperature(self.model):
+                params['temperature'] = self.temperature
+            self.completion = openai.chat.completions.create(**params)
             self.error = False
             message = self.completion.choices[0].message
             self.response = self._extract_message_text_and_attachments(

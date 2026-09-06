@@ -42,6 +42,32 @@ class TestPromptCore:
         assert response == "Hello, world!"
         assert len(client.openai_messages) == 2  # user message + assistant response
         assert client.openai_messages[0]['content'] == "Hi"
+        request = mock_create.call_args.kwargs
+        assert request['model'] == 'gpt-4o'
+        assert request['max_completion_tokens'] == 1000
+        assert request['temperature'] == 0.7
+        assert 'max_tokens' not in request
+
+    @patch('multiai.multiai.openai.chat.completions.create')
+    def test_ask_openai_new_gpt_omits_unsupported_parameters(
+            self, mock_create, mock_config, mock_environment):
+        """New GPT models omit temperature and never send null token limits."""
+        mock_response = MagicMock()
+        mock_response.choices[0].message.content = 'Hello, world!'
+        mock_response.choices[0].finish_reason = 'stop'
+        mock_create.return_value = mock_response
+
+        client = Prompt()
+        client.set_model('OPENAI', 'gpt-6-astra')
+        client.max_tokens = None
+
+        client.ask('Hi')
+
+        request = mock_create.call_args.kwargs
+        assert request['model'] == 'gpt-6-astra'
+        assert 'max_tokens' not in request
+        assert 'max_completion_tokens' not in request
+        assert 'temperature' not in request
 
     def test_retrieve_from_file_text(self, mock_config, tmp_path):
         """Test retrieving text from a standard text file."""

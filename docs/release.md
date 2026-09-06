@@ -2,6 +2,10 @@
 
 The release history is listed from newest to oldest. To check your installed version, run: `python -m pip show multiai`. To upgrade to the latest version, run: `python -m pip install --upgrade multiai`.
 
+## 1.6.2 - 2026/9/7
+- Fix: OpenAI requests now omit unset token limits instead of sending `null`, preventing an error with newer models such as `gpt-6-astra`.
+- Change: Use `max_completion_tokens` for OpenAI output limits, and omit `temperature` for GPT-5 and newer GPT models and o-series reasoning models.
+
 ## 1.6.1 - 2026/7/7
 - Fix: Anthropic requests now stream internally, avoiding the SDK's default 10-minute timeout on long-running (e.g. reasoning) responses. The complete response text is still returned as before.
 - Fix: Prevent a crash when an Anthropic response contains a text block whose text is `None` (`TypeError`/`AttributeError` when building the response).
